@@ -22,27 +22,15 @@
                             <table id="plateau" style="border-collapse: collapse">
                             </table>
                             <script type="text/javascript">
-                               dataPlateau = [ [{g:1, h:1}, {h:1}, {h:1}, {h:1}	, {h:1}	, {h:1,d:1}	, {h:1}		, {h:1}	, {h:1,d:1}	, {h:1}	, {h:1}		, {h:1}	, {h:1}	, {h:1}		, {h:1} , {h:1,d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {}		, {}	, {}		, {d:1}	, {b:1}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {b:1}, {}	, {}	, {}	, {}		, {}		, {}	, {}		, {}	, {}		, {}	, {}	, {g:1}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {g:1}, {}	, {}	, {}	, {}		, {}		, {}	, {}		, {}	, {}		, {d:1}	, {h:1}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {b:1,d:1}	, {}	, {}		, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1,b:1}]
-                                        , [{g:1,b:1} , {}	, {b:1}	, {}	, {}	, {}		, {}		, {d:1}	, {b:1}		, {}	, {}		, {}	, {}	, {b:1}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {d:1}	, {b:1}	, {}	, {}		, {}		, {}	, {}		, {}	, {}		, {}	, {}	, {d:1}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {d:1}		, {h:1}	, {h:1,d:1}	, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {d:1}		, {b:1}	, {b:1,d:1}	, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {d:1}, {b:1}	, {}	, {}	, {}		, {}		, {}	, {}		, {}	, {b:1,d:1}	, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {d:1}	, {}	, {}	, {}		, {}		, {}	, {}		, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {d:1}		, {h:1}	, {}		, {}	, {}		, {}	, {h:1}	, {g:1,b:1}	, {} 	, {d:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {}		, {}		, {}	, {}		, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1,h:1} , {}	, {}	, {}	, {}	, {}		, {}		, {}	, {d:1}		, {h:1}	, {}		, {}	, {}	, {}		, {} 	, {d:1,h:1}]
-                                        , [{g:1}	 , {}	, {}	, {}	, {}	, {b:1,d:1}	, {}		, {}	, {}		, {}	, {}		, {}	, {}	, {}		, {} 	, {d:1}]
-                                        , [{g:1,b:1}, {b:1}	, {b:1}	, {b:1}	, {b:1}	, {b:1}		, {b:1,d:1}	, {b:1}	, {b:1}		, {b:1}	, {b:1,d:1}	, {b:1}	, {b:1}	, {b:1}		, {b:1} , {d:1,b:1}]
-                                        ];
-                                drawPlateau(dataPlateau);
-                                drawRobot(0,0,"red");
-                                drawRobot(5,10,"blue");
+                                XHR("GET", "/toto", {onload: function(){drawGame(this.responseText);}});
                             </script>
+                            <button onclick="selectRobot('tata', 'toto', 'red')">Red</button>
+                            <button onclick="selectRobot('tata', 'toto', 'green')">Green</button>
+                            <button onclick="selectRobot('tata', 'toto', 'blue')">Blue</button>
+                            <button onclick="selectRobot('tata', 'toto', 'yellow')">Yellow</button><br/>
+                            X:<input type="text" id="X"/> Y:<input type="text" id="Y"/>
+                            <button onclick="moveRobot('tata', 'toto', document.getElementById('X').value, document.getElementById('Y').value)">Move</button>
+
   			</section>
 		</section>
 		<footer>
