@@ -41,6 +41,10 @@ function init() {
     );
 }
 
+function addOnClickToCell(cell, x, y){
+    cell.onclick = function(){addCellToProposition(x, y)};
+}
+
 function drawPlateau(dataPlateau) {
     var plateau = document.getElementById("plateau");
     var height = dataPlateau.length;
@@ -61,6 +65,7 @@ function drawPlateau(dataPlateau) {
                 cell.style.borderTop = "2px black solid";
             if (dataPlateau[y][x].b)
                 cell.style.borderBottom = "2px black solid";
+            addOnClickToCell(cell, x, y);
         }
     }
 }
@@ -91,21 +96,73 @@ function drawTarget(x, y, color) {
     }
 }
 
+var robots;
+
 function drawGame(gameJson) {
     //alert(gameJson);
     game = JSON.parse(gameJson);
+    robots = game.robots;
     drawPlateau(game.board);
-    for (var i = 0; i < game.robots.length; i++) {
-        var robot = game.robots[i];
+    for (var i = 0; i < robots.length; i++) {
+        var robot = robots[i];
         drawRobot(robot.column, robot.line, robot.color);
     }
     drawTarget(game.target.c, game.target.l, game.target.t);
 }
 
-function selectRobot(login, idGame, color) {
-    XHR("POST", "/proposition", {variables: {login: login, idGame: idGame, proposition: {command: 'select', robot: color}}, onload: function() {alert(this.responseText);}});
+var proposition = [];
+var selected = {};
+
+function getRobot(c, l) {
+    for (var i=0; i<robots.length; i++) {
+        if (c === robots[i].column && l === robots[i].line)
+            return robots[i].color;
+    }
+    return "";
 }
 
-function moveRobot(login, idGame, x, y) {
-    XHR("POST", "/proposition", {variables: {login: login, idGame: idGame, proposition: {command: 'move', line: y, column: x}}, onload: function() {alert(this.responseText);}});
+function addCellToProposition(c, l) {
+    var robot = getRobot(c, l);
+    if (robot === "") {
+        moveRobot(l, c);
+        drawRobot(selected.column, selected.line);
+        drawRobot(c, l, selected.robot);
+    } else {
+        selectRobot(robot);
+        selected.robot = robot;
+    }
+    selected.column = c;
+    selected.line = l;
+}
+
+function printProposition() {
+    var div=document.getElementById("proposition");
+    div.innerHTML = "";
+    for (var i=0; i <proposition.length ; i++) {
+        div.innerHTML += JSON.stringify(proposition[i]) + "<br/>"
+    }
+}
+
+function popProposition() {
+    proposition.pop();
+    printProposition();
+}
+
+function deleteProposition() {
+    proposition = "";
+    printProposition();   
+}
+
+function selectRobot(color) {
+    proposition.push({command:"select", robot:color});
+    printProposition();
+}
+
+function moveRobot(line, column) {
+    proposition.push({command:"move", line:line, column:column});
+    printProposition();
+}
+
+function sendProposition(login, idGame) {
+    XHR("POST", "/proposition", {variables: {login: login, idGame: idGame, proposition: JSON.stringify(proposition)}, onload: function() {alert(this.responseText);}});
 }
