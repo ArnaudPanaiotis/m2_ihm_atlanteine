@@ -22,7 +22,7 @@
                             <table id="plateau" style="border-collapse: collapse">
                             </table>
                             <script type="text/javascript">
-                                XHR("GET", "/toto", {onload: function(){drawGame(this.responseText);}});
+                                XHR("GET", "/"+document.getElementById('idGame').value, {onload: function(){drawGame(this.responseText);}});
                             </script>
                             <!--<textarea rows="5" id="proposition" style="width: 100%"></textarea>
                             <button onclick="sendProposition('tata', 'toto', document.getElementById('proposition').value)">Send</button>-->
@@ -32,7 +32,7 @@
                             <button onclick="selectRobot('yellow')">Yellow</button><br/>
                             X:<input type="text" id="X"/> Y:<input type="text" id="Y"/>
                             <button onclick="moveRobot(document.getElementById('Y').value, document.getElementById('X').value)">Move</button><br/>-->
-                            <button onclick="sendProposition('tata', 'toto')">Send</button>
+                            <!--<button onclick="sendProposition('tata', 'toto')">Send</button>-->
                             <button onclick="popProposition()">Delete last</button>
                             <button onclick="deleteProposition()">Delete all</button>
                             <div id="proposition"></div>

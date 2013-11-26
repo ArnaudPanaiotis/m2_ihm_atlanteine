@@ -41,12 +41,9 @@ function init() {
     );
 }
 
-function addOnClickToCell(cell, x, y){
-    cell.onclick = function(){addCellToProposition(x, y)};
-}
-
 function drawPlateau(dataPlateau) {
     var plateau = document.getElementById("plateau");
+    plateau.innerHTML = "";
     var height = dataPlateau.length;
     var width = dataPlateau[0].length;
     for (var y = 0; y < height; y++) {
@@ -65,13 +62,19 @@ function drawPlateau(dataPlateau) {
                 cell.style.borderTop = "2px black solid";
             if (dataPlateau[y][x].b)
                 cell.style.borderBottom = "2px black solid";
-            addOnClickToCell(cell, x, y);
+            cell.oncklick = undefined;
+            cell.style.background = "";
         }
     }
 }
 
 function getCell(x, y) {
+//    alert(x+" "+y);
     return document.getElementById("plateau").rows[y].cells[x];
+}
+
+function addFunctionOnClick(cell, x, y, func) {
+    cell.onclick = function(){func(x,y);};
 }
 
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
@@ -79,9 +82,11 @@ function getCell(x, y) {
 function drawRobot(x, y, color) {
     var cell = getCell(x, y);
     if (color === undefined) {
+        cell.onclick = undefined;
         cell.style.background = "";
     } else {
         cell.style.background = "url('robot.png') " + color;
+        addFunctionOnClick(cell, x, y, selectRobot);
     }
 }
 
@@ -92,14 +97,38 @@ function drawTarget(x, y, color) {
     if (color === undefined) {
         cell.style.background = "";
     } else {
-        cell.style.background = "url('target.png') " + color;
+        if (cell.style.background !== "" & cell.style.background.substr(0,3) !== "url")
+            cell.style.background = "url('target_next.png') " + color;
+        else
+            cell.style.background = "url('target.png') " + color;
     }
 }
 
+// drawnext(x, y, color) affiche un mouvement possible de couleur "color" dans la case (x,y) 
+// drawNext(x, y)        efface un mouvement possible dans la case (x,y)
+function drawNext(x, y, color) {
+    var cell = getCell(x, y);
+    if (color === undefined) {
+        cell.style.background = "";
+        cell.onclick = undefined;
+    } else {
+        cell.style.background = color;
+        addFunctionOnClick(cell, x, y, moveRobot);
+    }
+}
 var robots;
+var proposition = [];
+var currentRobot = {};
+var nextPositions = [];
+var initGame;
+var target;
 
 function drawGame(gameJson) {
     //alert(gameJson);
+    if (gameJson === undefined)
+        gameJson = initGame;
+    else
+        initGame = gameJson;
     game = JSON.parse(gameJson);
     robots = game.robots;
     drawPlateau(game.board);
@@ -107,11 +136,9 @@ function drawGame(gameJson) {
         var robot = robots[i];
         drawRobot(robot.column, robot.line, robot.color);
     }
+    target = game.target;
     drawTarget(game.target.c, game.target.l, game.target.t);
 }
-
-var proposition = [];
-var selected = {};
 
 function getRobot(c, l) {
     for (var i=0; i<robots.length; i++) {
@@ -121,25 +148,92 @@ function getRobot(c, l) {
     return "";
 }
 
-function addCellToProposition(c, l) {
-    var robot = getRobot(c, l);
-    if (robot === "") {
-        moveRobot(l, c);
-        drawRobot(selected.column, selected.line);
-        drawRobot(c, l, selected.robot);
-    } else {
-        selectRobot(robot);
-        selected.robot = robot;
+function updateRobot(x, y, color) {
+    for (var i = 0; i < robots.length ;i++) {
+        if (robots[i].color === color) {
+            robots[i].column = x;
+            robots[i].line = y;
+        }
     }
-    selected.column = c;
-    selected.line = l;
 }
+
+function selectRobot(x, y) {
+    var robot = getRobot(x, y);
+    if (robot === "")
+        return;
+    proposition.push({command:"select", robot:robot});
+    currentRobot.color = robot;
+    currentRobot.x = x;
+    currentRobot.y = y;
+    currentRobot.nextX = x;
+    currentRobot.nextY = y;
+    sendProposition();
+}
+
+function moveRobot(x, y) {
+    proposition.push({command:"move", line:y, column:x});
+    currentRobot.nextX = x;
+    currentRobot.nextY = y;
+    sendProposition();
+}
+
+function sendProposition() {
+    printProposition();
+    XHR("POST", "/proposition", {
+        variables: {
+            login: document.getElementById('login').value,
+            idGame: document.getElementById('idGame').value,
+            proposition: JSON.stringify(proposition)},
+        onload: function(){updatePlateau(JSON.parse(this.responseText))}});
+}
+
+function updatePlateau(answer) {
+    if (answer.error !== undefined) {
+        alert("Requête mal formatée.");
+        return;
+    }
+    switch (answer.state) {
+        case "INVALID_MOVE":
+            alert("Déplacement impossible : "+answer.detail);
+            plateau.pop;
+            break;
+        case "INVALID_SELECT":
+            alert("Sélection impossible : "+answer.detail);
+            plateau.pop;
+            break;
+        case "INCOMPLETE":
+        case "SUCCESS":
+            drawRobot(currentRobot.x, currentRobot.y);
+            for (var i = 0; i < nextPositions.length; i++) {
+                drawNext(nextPositions[i].c, nextPositions[i].l);
+            }
+            nextPositions = answer.nextPositions;
+            for (var i = 0; i < nextPositions.length; i++) {
+                drawNext(nextPositions[i].c, nextPositions[i].l, currentRobot.color);
+            }
+            drawTarget(target.c, target.l, target.t);
+            drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
+            currentRobot.x = currentRobot.nextX;
+            currentRobot.y = currentRobot.nextY;
+            updateRobot(currentRobot.x, currentRobot.y, currentRobot.color);
+            if (answer.state === "SUCCESS") {
+                alert("Vous avez Gagné !");
+                for (var i = 0; i < robots.length ;i++) {
+                    getCell(robots[i].column, robots[i].line).onclick = undefined;
+                }
+            }
+            break;
+        default:
+            alert("state undefined : "+answer.detail);
+    }
+}
+
 
 function printProposition() {
     var div=document.getElementById("proposition");
     div.innerHTML = "";
     for (var i=0; i <proposition.length ; i++) {
-        div.innerHTML += JSON.stringify(proposition[i]) + "<br/>"
+        div.innerHTML += JSON.stringify(proposition[i]) + "<br/>";
     }
 }
 
@@ -149,20 +243,7 @@ function popProposition() {
 }
 
 function deleteProposition() {
-    proposition = "";
-    printProposition();   
-}
-
-function selectRobot(color) {
-    proposition.push({command:"select", robot:color});
+    proposition = [];
     printProposition();
-}
-
-function moveRobot(line, column) {
-    proposition.push({command:"move", line:line, column:column});
-    printProposition();
-}
-
-function sendProposition(login, idGame) {
-    XHR("POST", "/proposition", {variables: {login: login, idGame: idGame, proposition: JSON.stringify(proposition)}, onload: function() {alert(this.responseText);}});
+    drawGame();
 }
