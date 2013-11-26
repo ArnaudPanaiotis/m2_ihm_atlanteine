@@ -6,6 +6,7 @@
 		<title>Rasende Roboter</title>
 		<script type="text/javascript" src="/socket.io/socket.io.js"/>
 		<script type="text/javascript" src="js/logged.js"/>
+                <link rel="stylesheet" type="text/css" href="main.css?v=42"/>
 	</head>
 	<body onload="init()">
 		<header>
@@ -33,12 +34,14 @@
                             X:<input type="text" id="X"/> Y:<input type="text" id="Y"/>
                             <button onclick="moveRobot(document.getElementById('Y').value, document.getElementById('X').value)">Move</button><br/>-->
                             <!--<button onclick="sendProposition('tata', 'toto')">Send</button>-->
-                            <button onclick="popProposition()">Delete last</button>
+                            <!--<button onclick="popProposition()">Delete last</button>-->
                             <button onclick="deleteProposition()">Delete all</button>
-                            <div id="proposition"></div>
-
   			</section>
-		</section>
+                    <section id="info">
+                        <span id="teuse"><br/></span>
+                        <div id="proposition"></div>
+                    </section>
+                </section>
 		<footer>
 			Mini-projet IHM de M2PGI...
 		</footer>

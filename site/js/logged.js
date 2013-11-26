@@ -69,7 +69,6 @@ function drawPlateau(dataPlateau) {
 }
 
 function getCell(x, y) {
-//    alert(x+" "+y);
     return document.getElementById("plateau").rows[y].cells[x];
 }
 
@@ -124,7 +123,6 @@ var initGame;
 var target;
 
 function drawGame(gameJson) {
-    //alert(gameJson);
     if (gameJson === undefined)
         gameJson = initGame;
     else
@@ -161,7 +159,10 @@ function selectRobot(x, y) {
     var robot = getRobot(x, y);
     if (robot === "")
         return;
-    proposition.push({command:"select", robot:robot});
+    if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select")
+        proposition[proposition.length - 1].robot = robot;
+    else
+        proposition.push({command:"select", robot:robot});
     currentRobot.color = robot;
     currentRobot.x = x;
     currentRobot.y = y;
@@ -184,21 +185,21 @@ function sendProposition() {
             login: document.getElementById('login').value,
             idGame: document.getElementById('idGame').value,
             proposition: JSON.stringify(proposition)},
-        onload: function(){updatePlateau(JSON.parse(this.responseText))}});
+        onload: function(){updatePlateau(JSON.parse(this.responseText));}});
 }
 
 function updatePlateau(answer) {
     if (answer.error !== undefined) {
-        alert("Requête mal formatée.");
+        error("Requête mal formatée.");
         return;
     }
     switch (answer.state) {
         case "INVALID_MOVE":
-            alert("Déplacement impossible : "+answer.detail);
+            error("Déplacement impossible : "+answer.details);
             plateau.pop;
             break;
         case "INVALID_SELECT":
-            alert("Sélection impossible : "+answer.detail);
+            error("Sélection impossible : "+answer.details);
             plateau.pop;
             break;
         case "INCOMPLETE":
@@ -217,23 +218,28 @@ function updatePlateau(answer) {
             currentRobot.y = currentRobot.nextY;
             updateRobot(currentRobot.x, currentRobot.y, currentRobot.color);
             if (answer.state === "SUCCESS") {
-                alert("Vous avez Gagné !");
+                success("Vous avez Gagné !");
                 for (var i = 0; i < robots.length ;i++) {
                     getCell(robots[i].column, robots[i].line).onclick = undefined;
                 }
             }
             break;
         default:
-            alert("state undefined : "+answer.detail);
+            error("state undefined");
     }
 }
 
 
 function printProposition() {
     var div=document.getElementById("proposition");
+    var color;
     div.innerHTML = "";
     for (var i=0; i <proposition.length ; i++) {
-        div.innerHTML += JSON.stringify(proposition[i]) + "<br/>";
+        if (proposition[i].command === "select") {
+            color = proposition[i].robot;
+        } else {
+            div.innerHTML += "<span style='border-left:10px solid "+color+"'>X: "+proposition[i].column+", Y:"+proposition[i].line+"</span><br/>";
+        }
     }
 }
 
@@ -247,3 +253,15 @@ function deleteProposition() {
     printProposition();
     drawGame();
 }
+
+function error(text) {
+    var div=document.getElementById("teus");
+    div.innerHTML = text;
+    div.style.border = "2px solid red";
+} 
+
+function success(text) {
+    var div=document.getElementById("teuse");
+    div.innerHTML = text;
+    div.style.border = "2px solid green";
+} 

@@ -1,0 +1,16 @@
+#partie {
+    float:left;
+}
+
+#info {
+    overflow:hidden;
+    padding:20px;
+}
+
+#proposition {
+    margin-top:20px;
+}
+
+footer {
+    clear:both;
+}
