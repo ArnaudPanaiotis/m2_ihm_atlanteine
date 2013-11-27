@@ -28,13 +28,18 @@ function init() {
     socket.on('FinalCountDown', function(data) {
         var ms = data.FinalCountDown;
         console.log("FinalCountDown : " + ms);
+//        alert(JSON.stringify(data));
+        setCountdown(data);
     });
     socket.on('TerminateGame', function(data) {
         h1 = document.querySelector('body > header > h1');
         h1.innerHTML += ' est terminée !';
+//        alert(JSON.stringify(data));
     });
     socket.on('solutions', function(data) {
         console.log("Solutions are :\n" + JSON.stringify(data.solutions));
+//        alert(JSON.stringify(data));
+        displayWiners(data);
     });
     socket.emit('identification', {login: document.getElementById('login').value
                 , idGame: document.getElementById('idGame').value}
@@ -50,10 +55,6 @@ function drawPlateau(dataPlateau) {
         var row = plateau.insertRow(-1);
         for (var x = 0; x < width; x++) {
             var cell = row.insertCell(-1);
-            cell.style.border = "1px grey dotted";
-            cell.style.padding = "0";
-            cell.style.width = "30px";
-            cell.style.height = "30px";
             if (dataPlateau[y][x].g)
                 cell.style.borderLeft = "2px black solid";
             if (dataPlateau[y][x].d)
@@ -115,6 +116,7 @@ function drawNext(x, y, color) {
         addFunctionOnClick(cell, x, y, moveRobot);
     }
 }
+
 var robots;
 var proposition = [];
 var currentRobot = {};
@@ -123,6 +125,7 @@ var initGame;
 var target;
 
 function drawGame(gameJson) {
+//    alert(gameJson);
     if (gameJson === undefined)
         gameJson = initGame;
     else
@@ -144,15 +147,6 @@ function getRobot(c, l) {
             return robots[i].color;
     }
     return "";
-}
-
-function updateRobot(x, y, color) {
-    for (var i = 0; i < robots.length ;i++) {
-        if (robots[i].color === color) {
-            robots[i].column = x;
-            robots[i].line = y;
-        }
-    }
 }
 
 function selectRobot(x, y) {
@@ -216,10 +210,13 @@ function updatePlateau(answer) {
             drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
-            updateRobot(currentRobot.x, currentRobot.y, currentRobot.color);
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
-                for (var i = 0; i < robots.length ;i++) {
+                for (var i = 0; i < proposition.length ;i++) {
+                    if (proposition[i].command === "move")
+                        getCell(proposition[i].column, proposition[i].line).onclick = undefined;
+                }
+               for (var i = 0; i < robots.length ;i++) {
                     getCell(robots[i].column, robots[i].line).onclick = undefined;
                 }
             }
@@ -229,23 +226,18 @@ function updatePlateau(answer) {
     }
 }
 
-
 function printProposition() {
-    var div=document.getElementById("proposition");
+    var prop=document.getElementById("proposition");
     var color;
-    div.innerHTML = "";
+    prop.innerHTML = "<tr><td>X</td><td>Y</td></tr>";
     for (var i=0; i <proposition.length ; i++) {
         if (proposition[i].command === "select") {
             color = proposition[i].robot;
+            //prop.innerHTML += "<tr class='select' style='border-color:"+color+"'></tr>";
         } else {
-            div.innerHTML += "<span style='border-left:10px solid "+color+"'>X: "+proposition[i].column+", Y:"+proposition[i].line+"</span><br/>";
+            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+proposition[i].column+"</td><td>"+proposition[i].line+"</td></tr>";
         }
     }
-}
-
-function popProposition() {
-    proposition.pop();
-    printProposition();
 }
 
 function deleteProposition() {
@@ -255,7 +247,7 @@ function deleteProposition() {
 }
 
 function error(text) {
-    var div=document.getElementById("teus");
+    var div=document.getElementById("teuse");
     div.innerHTML = text;
     div.style.border = "2px solid red";
 } 
@@ -264,4 +256,81 @@ function success(text) {
     var div=document.getElementById("teuse");
     div.innerHTML = text;
     div.style.border = "2px solid green";
-} 
+}
+
+function cancelLast() {
+    if (proposition.length === 0)
+        return;
+    for (var i=0 ; i<nextPositions.length ; i++) {
+        drawNext(nextPositions[i].c, nextPositions[i].l);
+    }
+    if (proposition[proposition.length-1].command === "move") {
+        proposition.pop();
+        drawRobot(currentRobot.x, currentRobot.y);
+        if (proposition.length !== 0 && proposition[proposition.length-1].command === "move") {
+            currentRobot.x = proposition[proposition.length-1].column;
+            currentRobot.y = proposition[proposition.length-1].line;
+        } else {
+            var i;
+            for (i=0 ; robots[i].color !== currentRobot.color ;i++);
+            currentRobot.x = robots[i].column;
+            currentRobot.y = robots[i].line;
+        }
+        currentRobot.nextX = currentRobot.x;
+        currentRobot.nextY = currentRobot.y;
+        drawRobot(currentRobot.x, currentRobot.y, currentRobot.color);
+    } else {
+        proposition.pop();
+        if (proposition.lenght !== 0) {
+            currentRobot.x = proposition[proposition.length-1].column;
+            currentRobot.y = proposition[proposition.length-1].line;
+            currentRobot.nextX = currentRobot.x;
+            currentRobot.nextY = currentRobot.y;
+            var i;
+            for (i = proposition.length-1 ; proposition[i].command !== "select" ; i-- );
+            currentRobot.color = proposition[i].robot;
+        }
+        //cancelLast();
+    }
+    sendProposition();
+    printProposition();
+}
+
+function displayWiners(data) {
+    var list = document.getElementById("lesParticipants").getElementsByTagName("li");
+    for (var i=0 ; i<data.solutions.length ; i++) {
+        for (var j=0 ; j<list.length ; j++) {
+            if (list[j].innerHTML === data.solutions[i].player) {
+                var len = 0;
+                for (var k=0 ; k<data.solutions[i].proposition.length ;k++) {
+                    if (data.solutions[i].proposition[k].command === "move")
+                        len++;
+                }
+                if (len === 1)
+                    list[j].innerHTML += " à gagné en 1 coup.";
+                else
+                    list[j].innerHTML += " à gagné en "+len+" coups.";
+            }
+        }
+    }
+}
+
+function setCountdown(data) {
+    var time = data.FinalCountDown / 1000;
+    var interval;
+    var timer = document.getElementById("timer");
+    function countdown() {
+        if (time === 1)
+            timer.innerHTML = "Il reste 1 seconde !";
+        else if (time === 0) {
+            timer.innerHTML = "Partie terminée !";
+            clearInterval(interval);
+        }
+        else
+            timer.innerHTML = "Il reste " + time + " secondes !";
+        time--;
+    }
+    countdown();
+    interval = setInterval(countdown, 1000);
+}
+

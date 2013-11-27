@@ -20,7 +20,7 @@
 				<ul id="lesParticipants" />
 			</nav>
 			<section id="partie">
-                            <table id="plateau" style="border-collapse: collapse">
+                            <table id="plateau">
                             </table>
                             <script type="text/javascript">
                                 XHR("GET", "/"+document.getElementById('idGame').value, {onload: function(){drawGame(this.responseText);}});
@@ -34,12 +34,15 @@
                             X:<input type="text" id="X"/> Y:<input type="text" id="Y"/>
                             <button onclick="moveRobot(document.getElementById('Y').value, document.getElementById('X').value)">Move</button><br/>-->
                             <!--<button onclick="sendProposition('tata', 'toto')">Send</button>-->
-                            <!--<button onclick="popProposition()">Delete last</button>-->
+                            <button onclick="cancelLast()">Delete last</button>
                             <button onclick="deleteProposition()">Delete all</button>
   			</section>
                     <section id="info">
+                        <div id="timer">Partie en cours...</div>
                         <span id="teuse"><br/></span>
-                        <div id="proposition"></div>
+                        <table id="proposition">
+                            <tr><td>X</td><td>Y</td></tr>
+                        </table>
                     </section>
                 </section>
 		<footer>
