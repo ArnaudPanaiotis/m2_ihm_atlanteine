@@ -54,7 +54,7 @@ function drawPlateau(dataPlateau) {
     var row = plateau.insertRow(-1);
     row.insertCell(-1);
     for (var x = 0; x < width; x++)
-        row.insertCell(-1).innerHTML = x+1;    
+        row.insertCell(-1).innerHTML = String.fromCharCode('A'.charCodeAt(0)+x);    
     for (var y = 0; y < height; y++) {
         var row = plateau.insertRow(-1);
         row.insertCell(-1).innerHTML = y+1;
@@ -234,12 +234,12 @@ function updatePlateau(answer) {
 function printProposition() {
     var prop=document.getElementById("proposition");
     var color;
-    prop.innerHTML = "<tr><td>X</td><td>Y</td></tr>";
+    prop.innerHTML = "";
     for (var i=0; i <proposition.length ; i++) {
         if (proposition[i].command === "select") {
             color = proposition[i].robot;
         } else {
-            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+(proposition[i].column+1)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
+            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
     }
 }
