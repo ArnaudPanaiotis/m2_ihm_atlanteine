@@ -25,15 +25,6 @@
                             <script type="text/javascript">
                                 XHR("GET", "/"+document.getElementById('idGame').value, {onload: function(){drawGame(this.responseText);}});
                             </script>
-                            <!--<textarea rows="5" id="proposition" style="width: 100%"></textarea>
-                            <button onclick="sendProposition('tata', 'toto', document.getElementById('proposition').value)">Send</button>-->
-                            <!--<button onclick="selectRobot('red')">Red</button>
-                            <button onclick="selectRobot('green')">Green</button>
-                            <button onclick="selectRobot('blue')">Blue</button>
-                            <button onclick="selectRobot('yellow')">Yellow</button><br/>
-                            X:<input type="text" id="X"/> Y:<input type="text" id="Y"/>
-                            <button onclick="moveRobot(document.getElementById('Y').value, document.getElementById('X').value)">Move</button><br/>-->
-                            <!--<button onclick="sendProposition('tata', 'toto')">Send</button>-->
                             <button onclick="cancelLast()">Delete last</button>
                             <button onclick="deleteProposition()">Delete all</button>
   			</section>

@@ -49,3 +49,16 @@ footer {
     width: 30px;
     height: 30px;
 }
+
+#plateau td:first-child {
+    border:none;
+    width:auto;
+    padding-right: 3px;
+    text-align:right;
+}
+
+#plateau tr:first-child td {
+    border:none;
+    height: auto;
+    text-align: center;
+}

@@ -51,8 +51,13 @@ function drawPlateau(dataPlateau) {
     plateau.innerHTML = "";
     var height = dataPlateau.length;
     var width = dataPlateau[0].length;
+    var row = plateau.insertRow(-1);
+    row.insertCell(-1);
+    for (var x = 0; x < width; x++)
+        row.insertCell(-1).innerHTML = x+1;    
     for (var y = 0; y < height; y++) {
         var row = plateau.insertRow(-1);
+        row.insertCell(-1).innerHTML = y+1;
         for (var x = 0; x < width; x++) {
             var cell = row.insertCell(-1);
             if (dataPlateau[y][x].g)
@@ -70,7 +75,7 @@ function drawPlateau(dataPlateau) {
 }
 
 function getCell(x, y) {
-    return document.getElementById("plateau").rows[y].cells[x];
+    return document.getElementById("plateau").rows[y+1].cells[x+1];
 }
 
 function addFunctionOnClick(cell, x, y, func) {
@@ -222,7 +227,7 @@ function updatePlateau(answer) {
             }
             break;
         default:
-            error("state undefined");
+            error("Erreur interne !");
     }
 }
 
@@ -233,9 +238,8 @@ function printProposition() {
     for (var i=0; i <proposition.length ; i++) {
         if (proposition[i].command === "select") {
             color = proposition[i].robot;
-            //prop.innerHTML += "<tr class='select' style='border-color:"+color+"'></tr>";
         } else {
-            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+proposition[i].column+"</td><td>"+proposition[i].line+"</td></tr>";
+            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+(proposition[i].column+1)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
     }
 }
