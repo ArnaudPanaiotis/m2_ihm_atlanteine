@@ -73,7 +73,9 @@ function getCell(x, y) {
 }
 
 function addFunctionOnClick(cell, x, y, func) {
-    cell.onclick = function(){func(x,y);};
+    cell.onclick = function() {
+        func(x, y);
+    };
 }
 
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
@@ -96,7 +98,7 @@ function drawTarget(x, y, color) {
     if (color === undefined) {
         cell.style.background = "";
     } else {
-        if (cell.style.background !== "" & cell.style.background.substr(0,3) !== "url")
+        if (cell.style.background !== "" & cell.style.background.substr(0, 3) !== "url")
             cell.style.background = "url('target_next.png') " + color;
         else
             cell.style.background = "url('target.png') " + color;
@@ -121,7 +123,8 @@ var currentRobot = {};
 var nextPositions = [];
 var initGame;
 var target;
-
+var directionMovement = {};
+var activateEvent = true;
 function drawGame(gameJson) {
     if (gameJson === undefined)
         gameJson = initGame;
@@ -139,15 +142,23 @@ function drawGame(gameJson) {
 }
 
 function getRobot(c, l) {
-    for (var i=0; i<robots.length; i++) {
+    for (var i = 0; i < robots.length; i++) {
         if (c === robots[i].column && l === robots[i].line)
             return robots[i].color;
     }
     return "";
 }
 
+function getRobotPosition(color) {
+    for (var i = 0; i < robots.length; i++) {
+        if (color === robots[i].color)
+            return robots[i];
+    }
+    return "";
+}
+
 function updateRobot(x, y, color) {
-    for (var i = 0; i < robots.length ;i++) {
+    for (var i = 0; i < robots.length; i++) {
         if (robots[i].color === color) {
             robots[i].column = x;
             robots[i].line = y;
@@ -162,7 +173,7 @@ function selectRobot(x, y) {
     if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select")
         proposition[proposition.length - 1].robot = robot;
     else
-        proposition.push({command:"select", robot:robot});
+        proposition.push({command: "select", robot: robot});
     currentRobot.color = robot;
     currentRobot.x = x;
     currentRobot.y = y;
@@ -172,9 +183,10 @@ function selectRobot(x, y) {
 }
 
 function moveRobot(x, y) {
-    proposition.push({command:"move", line:y, column:x});
+    proposition.push({command: "move", line: y, column: x});
     currentRobot.nextX = x;
     currentRobot.nextY = y;
+    activateEvent = false;
     sendProposition();
 }
 
@@ -185,7 +197,9 @@ function sendProposition() {
             login: document.getElementById('login').value,
             idGame: document.getElementById('idGame').value,
             proposition: JSON.stringify(proposition)},
-        onload: function(){updatePlateau(JSON.parse(this.responseText));}});
+        onload: function() {
+            updatePlateau(JSON.parse(this.responseText));
+        }});
 }
 
 function updatePlateau(answer) {
@@ -193,14 +207,17 @@ function updatePlateau(answer) {
         error("Requête mal formatée.");
         return;
     }
+    activateEvent = false;
     switch (answer.state) {
         case "INVALID_MOVE":
-            error("Déplacement impossible : "+answer.details);
+            error("Déplacement impossible : " + answer.details);
             plateau.pop;
+            activateEvent = true;
             break;
         case "INVALID_SELECT":
-            error("Sélection impossible : "+answer.details);
+            error("Sélection impossible : " + answer.details);
             plateau.pop;
+            activateEvent = true;
             break;
         case "INCOMPLETE":
         case "SUCCESS":
@@ -217,9 +234,11 @@ function updatePlateau(answer) {
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
             updateRobot(currentRobot.x, currentRobot.y, currentRobot.color);
+            moveDirection();
+            activateEvent = true;
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
-                for (var i = 0; i < robots.length ;i++) {
+                for (var i = 0; i < robots.length; i++) {
                     getCell(robots[i].column, robots[i].line).onclick = undefined;
                 }
             }
@@ -229,16 +248,96 @@ function updatePlateau(answer) {
     }
 }
 
+window.addEventListener('keydown', function(event) {
+    if (activateEvent)
+    {
+        switch (event.keyCode) {
+            case 37:
+                if (directionMovement.left !== false)
+                {
+                    moveRobot(directionMovement.left.c, directionMovement.left.l);
+                }
+                break;
+            case 38:
+                if (directionMovement.up !== false)
+                {
+                    moveRobot(directionMovement.up.c, directionMovement.up.l);
+                }
+                break;
+            case 39:
+                if (directionMovement.right !== false)
+                {
+                    moveRobot(directionMovement.right.c, directionMovement.right.l);
+                }
+                break;
+            case 40:
+                if (directionMovement.down !== false)
+                {
+                    moveRobot(directionMovement.down.c, directionMovement.down.l);
+                }
+                break;
+                
+           
+        }
+    }
+
+    switch (event.keyCode) {
+        case 65:
+            var robot = getRobotPosition("blue");
+            selectRobot(robot.column, robot.line);
+            break;
+        case 90:
+            var robot = getRobotPosition("red");
+            selectRobot(robot.column, robot.line);
+            break;
+        case 69:
+            var robot = getRobotPosition("green");
+            selectRobot(robot.column, robot.line);
+            break;
+        case 82:
+            var robot = getRobotPosition("yellow");
+            selectRobot(robot.column, robot.line);
+            break;
+    }
+    if (event.preventDefault)
+    {
+        event.preventDefault();
+    }
+}, false);
+function moveDirection() {
+    directionMovement.left = false;
+    directionMovement.right = false;
+    directionMovement.up = false;
+    directionMovement.down = false;
+    for (var i = 0; i < nextPositions.length; i++) {
+        if (nextPositions[i].c > currentRobot.x)
+        {
+            directionMovement.right = nextPositions[i];
+        }
+        if (nextPositions[i].c < currentRobot.x)
+        {
+            directionMovement.left = nextPositions[i];
+        }
+        if (nextPositions[i].l < currentRobot.y)
+        {
+            directionMovement.up = nextPositions[i];
+        }
+        if (nextPositions[i].l > currentRobot.y)
+        {
+            directionMovement.down = nextPositions[i];
+        }
+    }
+}
 
 function printProposition() {
-    var div=document.getElementById("proposition");
+    var div = document.getElementById("proposition");
     var color;
     div.innerHTML = "";
-    for (var i=0; i <proposition.length ; i++) {
+    for (var i = 0; i < proposition.length; i++) {
         if (proposition[i].command === "select") {
             color = proposition[i].robot;
         } else {
-            div.innerHTML += "<span style='border-left:10px solid "+color+"'>X: "+proposition[i].column+", Y:"+proposition[i].line+"</span><br/>";
+            div.innerHTML += "<span style='border-left:10px solid " + color + "'>X: " + proposition[i].column + ", Y:" + proposition[i].line + "</span><br/>";
         }
     }
 }
@@ -255,13 +354,13 @@ function deleteProposition() {
 }
 
 function error(text) {
-    var div=document.getElementById("teus");
+    var div = document.getElementById("teus");
     div.innerHTML = text;
     div.style.border = "2px solid red";
-} 
+}
 
 function success(text) {
-    var div=document.getElementById("teuse");
+    var div = document.getElementById("teuse");
     div.innerHTML = text;
     div.style.border = "2px solid green";
 } 
