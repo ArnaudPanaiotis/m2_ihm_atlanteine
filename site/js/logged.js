@@ -235,8 +235,6 @@ function updatePlateau(answer) {
             drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
-            //moveDirection();
-            activateEvent = true;
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length ;i++) {
@@ -246,6 +244,12 @@ function updatePlateau(answer) {
                for (var i = 0; i < robots.length ;i++) {
                     getCell(robots[i].column, robots[i].line).onclick = undefined;
                 }
+                var buttons = document.getElementById("partie").getElementsByTagName("button");
+                for (var i=0 ; i<buttons.length ; i++) {
+                    buttons[i].setAttribute("disabled", "true");
+                }
+            } else {
+                activateEvent = true;
             }
             break;
         default:
@@ -254,19 +258,27 @@ function updatePlateau(answer) {
 }
 
 var keys = [
-    {code:37, command:"move", action:"left"},
-    {code:38, command:"move", action:"up"},
-    {code:39, command:"move", action:"right"},
-    {code:40, command:"move", action:"down"},
-    {code:65, command:"select", action:"blue"},
-    {code:90, command:"select", action:"red"},
-    {code:69, command:"select", action:"green"},
-    {code:82, command:"select", action:"yellow"}
+    {key:"Left",  command:"move", action:"left"},
+    {key:"Up",    command:"move", action:"up"},
+    {key:"Right", command:"move", action:"right"},
+    {key:"Down",  command:"move", action:"down"},
+    {key:"a", command:"select", action:"blue"},
+    {key:"z", command:"select", action:"red"},
+    {key:"e", command:"select", action:"green"},
+    {key:"r", command:"select", action:"yellow"},
+    {key:"A", command:"select", action:"blue"},
+    {key:"Z", command:"select", action:"red"},
+    {key:"E", command:"select", action:"green"},
+    {key:"R", command:"select", action:"yellow"},
+    {key:"q", command:"select", action:"blue"},
+    {key:"w", command:"select", action:"red"},
+    {key:"Q", command:"select", action:"blue"},
+    {key:"W", command:"select", action:"red"},
 ];
 
-function getAction(keyCode) {
+function getAction(key) {
     for (var i=0 ; i<keys.length ; i++) {
-        if (keys[i].code === keyCode)
+        if (keys[i].key === key)
             return keys[i];
     }
 }
@@ -285,7 +297,12 @@ function getNext(dir) {
 }
 
 function onKey(event) {
-    var action = getAction(event.keyCode);
+    var action;
+    if (event.charCode === 0) {
+        action = getAction(event.key);
+    } else {
+        action = getAction(String.fromCharCode(event.charCode));
+    }
     if (action === undefined || ! activateEvent)
         return;
     if (action.command === "select") {
@@ -303,10 +320,10 @@ function onKey(event) {
     }
 }
 
-window.addEventListener('keydown', onKey, false);
+window.addEventListener('keypress', onKey, false);
 
 function printProposition() {
-    var prop=document.getElementById("proposition");
+    var prop = document.getElementById("proposition");
     var color;
     prop.innerHTML = "";
     for (var i=0; i <proposition.length ; i++) {
