@@ -93,6 +93,10 @@ function drawRobot(x, y, color) {
         cell.style.background = "url('robot.png') " + color;
         addFunctionOnClick(cell, x, y, selectRobot);
     }
+    
+    if (color==="red") {
+        cell.setAttribute("accesskey", "r");
+    }
 }
 
 // drawTarget(x, y, color) affiche une cible de couleur "color" dans la case (x,y) 
@@ -179,12 +183,13 @@ function moveRobot(x, y) {
 
 function sendProposition() {
     printProposition();
-    XHR("POST", "/proposition", {
-        variables: {
-            login: document.getElementById('login').value,
-            idGame: document.getElementById('idGame').value,
-            proposition: JSON.stringify(proposition)},
-        onload: function(){updatePlateau(JSON.parse(this.responseText));}});
+    if (proposition.length !== 0)
+        XHR("POST", "/proposition", {
+            variables: {
+                login: document.getElementById('login').value,
+                idGame: document.getElementById('idGame').value,
+                proposition: JSON.stringify(proposition)},
+            onload: function(){updatePlateau(JSON.parse(this.responseText));}});
 }
 
 function updatePlateau(answer) {
@@ -238,10 +243,14 @@ function printProposition() {
     for (var i=0; i <proposition.length ; i++) {
         if (proposition[i].command === "select") {
             color = proposition[i].robot;
+            var j;
+            for (j=0 ; robots[j].color !== proposition[i].robot ; j++);
+            prop.innerHTML += "<tr class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+robots[j].column)+"</td><td>"+(robots[j].line+1)+"</td></tr>";
         } else {
             prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
     }
+    document.getElementById("around_prop").scrollTop=9007199254740992; //MAXINT
 }
 
 function deleteProposition() {
@@ -285,7 +294,7 @@ function cancelLast() {
         drawRobot(currentRobot.x, currentRobot.y, currentRobot.color);
     } else {
         proposition.pop();
-        if (proposition.lenght !== 0) {
+        if (proposition.length !== 0) {
             currentRobot.x = proposition[proposition.length-1].column;
             currentRobot.y = proposition[proposition.length-1].line;
             currentRobot.nextX = currentRobot.x;
@@ -297,7 +306,6 @@ function cancelLast() {
         //cancelLast();
     }
     sendProposition();
-    printProposition();
 }
 
 function displayWiners(data) {
@@ -311,9 +319,9 @@ function displayWiners(data) {
                         len++;
                 }
                 if (len === 1)
-                    list[j].innerHTML += " à gagné en 1 coup.";
+                    list[j].innerHTML += " a gagné en 1 déplacement.";
                 else
-                    list[j].innerHTML += " à gagné en "+len+" coups.";
+                    list[j].innerHTML += " a gagné en "+len+" déplacements.";
             }
         }
     }
@@ -337,4 +345,3 @@ function setCountdown(data) {
     countdown();
     interval = setInterval(countdown, 1000);
 }
-
