@@ -134,8 +134,8 @@ var currentRobot = {};
 var nextPositions = [];
 var initGame;
 var target;
-var directionMovement = {};
 var activateEvent = true;
+
 function drawGame(gameJson) {
 //    alert(gameJson);
     if (gameJson === undefined)
@@ -167,15 +167,6 @@ function getRobotPosition(color) {
             return robots[i];
     }
     return "";
-}
-
-function updateRobot(x, y, color) {
-    for (var i = 0; i < robots.length; i++) {
-        if (robots[i].color === color) {
-            robots[i].column = x;
-            robots[i].line = y;
-        }
-    }
 }
 
 function selectRobot(x, y) {
@@ -244,8 +235,7 @@ function updatePlateau(answer) {
             drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
-            updateRobot(currentRobot.x, currentRobot.y, currentRobot.color);
-            moveDirection();
+            //moveDirection();
             activateEvent = true;
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
@@ -263,86 +253,57 @@ function updatePlateau(answer) {
     }
 }
 
-window.addEventListener('keydown', function(event) {
-    if (activateEvent)
-    {
-        switch (event.keyCode) {
-            case 37:
-                if (directionMovement.left !== false)
-                {
-                    moveRobot(directionMovement.left.c, directionMovement.left.l);
-                }
-                break;
-            case 38:
-                if (directionMovement.up !== false)
-                {
-                    moveRobot(directionMovement.up.c, directionMovement.up.l);
-                }
-                break;
-            case 39:
-                if (directionMovement.right !== false)
-                {
-                    moveRobot(directionMovement.right.c, directionMovement.right.l);
-                }
-                break;
-            case 40:
-                if (directionMovement.down !== false)
-                {
-                    moveRobot(directionMovement.down.c, directionMovement.down.l);
-                }
-                break;
-                
-           
-        }
-    }
+var keys = [
+    {code:37, command:"move", action:"left"},
+    {code:38, command:"move", action:"up"},
+    {code:39, command:"move", action:"right"},
+    {code:40, command:"move", action:"down"},
+    {code:65, command:"select", action:"blue"},
+    {code:90, command:"select", action:"red"},
+    {code:69, command:"select", action:"green"},
+    {code:82, command:"select", action:"yellow"}
+];
 
-    switch (event.keyCode) {
-        case 65:
-            var robot = getRobotPosition("blue");
-            selectRobot(robot.column, robot.line);
-            break;
-        case 90:
-            var robot = getRobotPosition("red");
-            selectRobot(robot.column, robot.line);
-            break;
-        case 69:
-            var robot = getRobotPosition("green");
-            selectRobot(robot.column, robot.line);
-            break;
-        case 82:
-            var robot = getRobotPosition("yellow");
-            selectRobot(robot.column, robot.line);
-            break;
+function getAction(keyCode) {
+    for (var i=0 ; i<keys.length ; i++) {
+        if (keys[i].code === keyCode)
+            return keys[i];
+    }
+}
+
+function getNext(dir) {
+    for (var i=0 ; i<nextPositions.length ; i++) {
+        if (nextPositions[i].c === currentRobot.x && nextPositions[i].l > currentRobot.y && dir === "down")
+            return nextPositions[i];
+         if (nextPositions[i].c === currentRobot.x && nextPositions[i].l < currentRobot.y && dir === "up")
+            return nextPositions[i];
+         if (nextPositions[i].c > currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "right")
+            return nextPositions[i];
+         if (nextPositions[i].c < currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "left")
+            return nextPositions[i];
+    }
+}
+
+function onKey(event) {
+    var action = getAction(event.keyCode);
+    if (action === undefined || ! activateEvent)
+        return;
+    if (action.command === "select") {
+        var robot = getRobotPosition(action.action);
+        selectRobot(robot.column, robot.line);
+    } else {
+        var position = getNext(action.action);
+        if (position === undefined)
+            return;
+        moveRobot(position.c, position.l);
     }
     if (event.preventDefault)
     {
         event.preventDefault();
     }
-}, false);
-function moveDirection() {
-    directionMovement.left = false;
-    directionMovement.right = false;
-    directionMovement.up = false;
-    directionMovement.down = false;
-    for (var i = 0; i < nextPositions.length; i++) {
-        if (nextPositions[i].c > currentRobot.x)
-        {
-            directionMovement.right = nextPositions[i];
-        }
-        if (nextPositions[i].c < currentRobot.x)
-        {
-            directionMovement.left = nextPositions[i];
-        }
-        if (nextPositions[i].l < currentRobot.y)
-        {
-            directionMovement.up = nextPositions[i];
-        }
-        if (nextPositions[i].l > currentRobot.y)
-        {
-            directionMovement.down = nextPositions[i];
-        }
-    }
 }
+
+window.addEventListener('keydown', onKey, false);
 
 function printProposition() {
     var prop=document.getElementById("proposition");
@@ -358,7 +319,7 @@ function printProposition() {
             prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
     }
-    document.getElementById("around_prop").scrollTop=9007199254740992; //MAXINT
+    document.getElementById("around_prop").scrollTop=1000000000;
 }
 
 function deleteProposition() {
