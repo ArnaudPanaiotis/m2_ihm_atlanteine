@@ -178,7 +178,6 @@ function getRobotPosition(color) {
 
 function selectRobot(x, y) {
     var robot = getRobot(x, y);
-    alert(robot);
     if (robot === "")
         return;
     if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select") {
