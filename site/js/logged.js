@@ -181,7 +181,15 @@ function selectRobot(x, y) {
     if (robot === "")
         return;
     if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select") {
-        proposition[proposition.length - 1].robot = robot;
+        proposition.pop();
+        var lastSelect;
+        for (var i=proposition.length-1 ; i>=0; i--)
+            if (proposition[i].command === "select") {
+                lastSelect = proposition[i].robot;
+                break;
+            }
+        if (robot !== lastSelect)
+            proposition.push({command: "select", robot: robot});
     } else if (robot !== currentRobot.color) {
         proposition.push({command: "select", robot: robot});
     }
@@ -354,8 +362,6 @@ function highlightCell(x, y, color) {
     }
 }
 
-
-
 function deleteProposition() {
     proposition = [];
     printProposition();
@@ -388,9 +394,9 @@ function cancelLast() {
             currentRobot.y = proposition[proposition.length-1].line;
         } else {
             var i;
-            for (i=0 ; robots[i].color !== currentRobot.color ;i++);
-            currentRobot.x = robots[i].column;
-            currentRobot.y = robots[i].line;
+            for (i=0 ; startPos[i].color !== currentRobot.color ;i++);
+            currentRobot.x = startPos[i].column;
+            currentRobot.y = startPos[i].line;
         }
         currentRobot.nextX = currentRobot.x;
         currentRobot.nextY = currentRobot.y;
