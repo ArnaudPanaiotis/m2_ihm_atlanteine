@@ -331,13 +331,24 @@ function printProposition() {
             color = proposition[i].robot;
             var j;
             for (j=0 ; robots[j].color !== proposition[i].robot ; j++);
-            prop.innerHTML += "<tr class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+robots[j].column)+"</td><td>"+(robots[j].line+1)+"</td></tr>";
+            prop.innerHTML += "<tr onmouseover='highlightCell("+robots[j].column+","+robots[j].line+",\""+color+"\")' onmouseout='highlightCell("+robots[j].column+","+robots[j].line+")' class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+robots[j].column)+"</td><td>"+(robots[j].line+1)+"</td></tr>";
         } else {
-            prop.innerHTML += "<tr><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
+            prop.innerHTML += "<tr onmouseover='highlightCell("+proposition[i].column+","+proposition[i].line+",\""+color+"\")' onmouseout='highlightCell("+proposition[i].column+","+proposition[i].line+")'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
     }
     document.getElementById("around_prop").scrollTop=1000000000;
 }
+
+function highlightCell(x, y, color) {
+    var cell = getCell(x,y);
+    if (color !== undefined) {
+        cell.style.outline = "1px solid "+color;
+    } else {
+        cell.style.outline = "";
+    }
+}
+
+
 
 function deleteProposition() {
     proposition = [];
