@@ -514,6 +514,8 @@ var gamepadSupport = {
       }
     }
   },onButton: function(event) {
+  	if (! activateEvent)
+        return;
   var button = event.button;
     switch (button){
 		case 0:
