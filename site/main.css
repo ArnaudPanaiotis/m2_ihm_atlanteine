@@ -56,7 +56,7 @@ footer {
 }
 
 #plateau td {
-    border: 1px dotted grey;
+    border: 1px solid lightgray;
     padding: 0px;
     width: 30px;
     height: 30px;
