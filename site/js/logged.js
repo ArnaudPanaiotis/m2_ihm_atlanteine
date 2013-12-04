@@ -258,22 +258,16 @@ function updatePlateau(answer) {
 }
 
 var keys = [
-    {key:"Left",  command:"move", action:"left"},
-    {key:"Up",    command:"move", action:"up"},
-    {key:"Right", command:"move", action:"right"},
-    {key:"Down",  command:"move", action:"down"},
-    {key:"a", command:"select", action:"blue"},
-    {key:"z", command:"select", action:"red"},
-    {key:"e", command:"select", action:"green"},
-    {key:"r", command:"select", action:"yellow"},
-    {key:"A", command:"select", action:"blue"},
-    {key:"Z", command:"select", action:"red"},
-    {key:"E", command:"select", action:"green"},
-    {key:"R", command:"select", action:"yellow"},
-    {key:"q", command:"select", action:"blue"},
-    {key:"w", command:"select", action:"red"},
-    {key:"Q", command:"select", action:"blue"},
-    {key:"W", command:"select", action:"red"},
+    {key:37, command:"move", action:"left"},
+    {key:38, command:"move", action:"up"},
+    {key:39, command:"move", action:"right"},
+    {key:40, command:"move", action:"down"},
+    {key:65, command:"select", action:"blue"},   // A Q
+    {key:90, command:"select", action:"red"},    // Z W
+    {key:69, command:"select", action:"green"},  // E
+    {key:82, command:"select", action:"yellow"}, // R
+    {key:8,  command:"deleteLast"},              // Del
+    {key:46, command:"deleteAll"},               // Suppr
 ];
 
 function getAction(key) {
@@ -287,32 +281,32 @@ function getNext(dir) {
     for (var i=0 ; i<nextPositions.length ; i++) {
         if (nextPositions[i].c === currentRobot.x && nextPositions[i].l > currentRobot.y && dir === "down")
             return nextPositions[i];
-         if (nextPositions[i].c === currentRobot.x && nextPositions[i].l < currentRobot.y && dir === "up")
+        if (nextPositions[i].c === currentRobot.x && nextPositions[i].l < currentRobot.y && dir === "up")
             return nextPositions[i];
-         if (nextPositions[i].c > currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "right")
+        if (nextPositions[i].c > currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "right")
             return nextPositions[i];
-         if (nextPositions[i].c < currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "left")
+        if (nextPositions[i].c < currentRobot.x && nextPositions[i].l === currentRobot.y && dir === "left")
             return nextPositions[i];
     }
 }
 
 function onKey(event) {
-    var action;
-    if (event.charCode === 0) {
-        action = getAction(event.key);
-    } else {
-        action = getAction(String.fromCharCode(event.charCode));
-    }
-    if (action === undefined || ! activateEvent)
+    //alert(event.keyCode);
+    var key = getAction(event.keyCode);
+    if (key === undefined || ! activateEvent)
         return;
-    if (action.command === "select") {
-        var robot = getRobotPosition(action.action);
+    if (key.command === "select") {
+        var robot = getRobotPosition(key.action);
         selectRobot(robot.column, robot.line);
-    } else {
-        var position = getNext(action.action);
+    } else if (key.command === "move" ) {
+        var position = getNext(key.action);
         if (position === undefined)
             return;
         moveRobot(position.c, position.l);
+    } else if (key.command === "deleteLast") {
+        cancelLast();
+    } else if (key.command === "deleteAll") {
+        deleteProposition();
     }
     if (event.preventDefault)
     {
@@ -320,7 +314,8 @@ function onKey(event) {
     }
 }
 
-window.addEventListener('keypress', onKey, false);
+window.addEventListener('keydown', onKey, false);
+//window.addEventListener('keypress', onKey, false);
 
 function printProposition() {
     var prop = document.getElementById("proposition");
