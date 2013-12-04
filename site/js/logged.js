@@ -135,6 +135,23 @@ var nextPositions = [];
 var initGame;
 var target;
 var activateEvent = true;
+var dragStart = {};
+
+
+function startDrag(e) {
+	if (!e) var e = window.event;
+	if (e.pageX || e.pageY) 	{
+		dragStart.x = e.pageX;
+		dragStart.y = e.pageY;
+	}
+	else if (e.clientX || e.clientY) 	{
+		dragStart.x = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		dragStart.y = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+}
+
 
 function drawGame(gameJson) {
 //    alert(gameJson);
