@@ -68,7 +68,7 @@ function drawPlateau(dataPlateau) {
                 cell.style.borderTop = "2px black solid";
             if (dataPlateau[y][x].b)
                 cell.style.borderBottom = "2px black solid";
-            cell.oncklick = undefined;
+            cell.onclick = undefined;
             cell.style.background = "";
         }
     }
@@ -84,16 +84,35 @@ function addFunctionOnClick(cell, x, y, func) {
     };
 }
 
+function addFunctionOnDragDrop(cell, x, y) {
+    if (getRobot(x,y) !== "")
+    {
+        cell.onmousedown = function(e) {
+        selectRobot(x, y);
+        startDrag(e);
+        };
+         cell.onmouseout = function(e) {
+            dragEnd(e);
+        }; 
+    }
+}
+
+function removeFunctions(cell) {
+    cell.onclick = undefined;
+    cell.onmousedown = undefined;
+    cell.onmouseout = undefined;
+}
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
 // drawRobot(x, y)        efface un robot dans la case (x,y)
 function drawRobot(x, y, color) {
     var cell = getCell(x, y);
     if (color === undefined) {
-        cell.onclick = undefined;
+        removeFunctions(cell);
         cell.style.background = "";
     } else {
         cell.style.background = "url('robot.png') " + color;
-        addFunctionOnClick(cell, x, y, selectRobot);
+        //addFunctionOnClick(cell, x, y, selectRobot);
+        addFunctionOnDragDrop(cell, x, y);
     }
     
     if (color==="red") {
@@ -121,7 +140,7 @@ function drawNext(x, y, color) {
     var cell = getCell(x, y);
     if (color === undefined) {
         cell.style.background = "";
-        cell.onclick = undefined;
+        removeFunctions(cell);
     } else {
         cell.style.background = color;
         addFunctionOnClick(cell, x, y, moveRobot);
@@ -153,8 +172,41 @@ function startDrag(e) {
 }
 
 
+function dragEnd(e) {
+        var x;
+        var y;
+	if (!e) var e = window.event;
+	if (e.pageX || e.pageY) 	{
+		x = e.pageX;
+		y = e.pageY;
+	}
+	else if (e.clientX || e.clientY){
+		x = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		y = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+        var dir;
+        
+        if (Math.abs(x-dragStart.x) > Math.abs(y-dragStart.y) && x-dragStart.x < 0 ){
+		dir = "left";
+		}
+	if (Math.abs(x-dragStart.x) > Math.abs(y-dragStart.y) && x-dragStart.x > 0 ){
+		dir="right";
+		}
+	if (Math.abs(x-dragStart.x) < Math.abs(y-dragStart.y) && y-dragStart.y < 0 ){
+		dir="up";
+		}
+	if (Math.abs(x-dragStart.x) < Math.abs(y-dragStart.y) && y-dragStart.y > 0 ){
+		dir="down";
+        }
+       var position = getNext(dir);
+        if (position === undefined)
+            return;
+        moveRobot(position.c, position.l);
+}
+
 function drawGame(gameJson) {
-//    alert(gameJson);
     if (gameJson === undefined)
         gameJson = initGame;
     else
@@ -256,10 +308,10 @@ function updatePlateau(answer) {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length ;i++) {
                     if (proposition[i].command === "move")
-                        getCell(proposition[i].column, proposition[i].line).onclick = undefined;
+                        removeFunctions(getCell(proposition[i].column, proposition[i].line));
                 }
                for (var i = 0; i < robots.length ;i++) {
-                    getCell(robots[i].column, robots[i].line).onclick = undefined;
+                    removeFunctions(getCell(robots[i].column, robots[i].line));
                 }
                 var buttons = document.getElementById("partie").getElementsByTagName("button");
                 for (var i=0 ; i<buttons.length ; i++) {
