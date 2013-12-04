@@ -114,10 +114,6 @@ function drawRobot(x, y, color) {
         //addFunctionOnClick(cell, x, y, selectRobot);
         addFunctionOnDragDrop(cell, x, y);
     }
-    
-    if (color==="red") {
-        cell.setAttribute("accesskey", "r");
-    }
 }
 
 // drawTarget(x, y, color) affiche une cible de couleur "color" dans la case (x,y) 
@@ -148,6 +144,7 @@ function drawNext(x, y, color) {
 }
 
 var robots;
+var startPos;
 var proposition = [];
 var currentRobot = {};
 var nextPositions = [];
@@ -213,6 +210,7 @@ function drawGame(gameJson) {
         initGame = gameJson;
     game = JSON.parse(gameJson);
     robots = game.robots;
+    startPos = JSON.parse(JSON.stringify(game.robots)); // deep copy
     drawPlateau(game.board);
     for (var i = 0; i < robots.length; i++) {
         var robot = robots[i];
@@ -220,6 +218,15 @@ function drawGame(gameJson) {
     }
     target = game.target;
     drawTarget(game.target.c, game.target.l, game.target.t);
+}
+
+function updateRobots(color, x, y) {
+    for (var i = 0; i < robots.length; i++) {
+        if (color === robots[i].color) {
+            robots[i].column = x;
+            robots[i].line = y;
+        }
+    }    
 }
 
 function getRobot(c, l) {
@@ -242,10 +249,19 @@ function selectRobot(x, y) {
     var robot = getRobot(x, y);
     if (robot === "")
         return;
-    if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select")
-        proposition[proposition.length - 1].robot = robot;
-    else
+    if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select") {
+        proposition.pop();
+        var lastSelect;
+        for (var i=proposition.length-1 ; i>=0; i--)
+            if (proposition[i].command === "select") {
+                lastSelect = proposition[i].robot;
+                break;
+            }
+        if (robot !== lastSelect)
+            proposition.push({command: "select", robot: robot});
+    } else if (robot !== currentRobot.color) {
         proposition.push({command: "select", robot: robot});
+    }
     currentRobot.color = robot;
     currentRobot.x = x;
     currentRobot.y = y;
@@ -304,6 +320,7 @@ function updatePlateau(answer) {
             drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
+            updateRobots(currentRobot.color, currentRobot.x, currentRobot.y);
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length ;i++) {
@@ -392,10 +409,12 @@ function printProposition() {
     prop.innerHTML = "";
     for (var i=0; i <proposition.length ; i++) {
         if (proposition[i].command === "select") {
+            if (color === proposition[i].robot)
+                continue;
             color = proposition[i].robot;
             var j;
-            for (j=0 ; robots[j].color !== proposition[i].robot ; j++);
-            prop.innerHTML += "<tr onmouseover='highlightCell("+robots[j].column+","+robots[j].line+",\""+color+"\")' onmouseout='highlightCell("+robots[j].column+","+robots[j].line+")' class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+robots[j].column)+"</td><td>"+(robots[j].line+1)+"</td></tr>";
+            for (j=0 ; startPos[j].color !== proposition[i].robot ; j++);
+            prop.innerHTML += "<tr onmouseover='highlightCell("+startPos[j].column+","+startPos[j].line+",\""+color+"\")' onmouseout='highlightCell("+startPos[j].column+","+startPos[j].line+")' class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+startPos[j].column)+"</td><td>"+(startPos[j].line+1)+"</td></tr>";
         } else {
             prop.innerHTML += "<tr onmouseover='highlightCell("+proposition[i].column+","+proposition[i].line+",\""+color+"\")' onmouseout='highlightCell("+proposition[i].column+","+proposition[i].line+")'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
         }
@@ -411,8 +430,6 @@ function highlightCell(x, y, color) {
         cell.style.outline = "";
     }
 }
-
-
 
 function deleteProposition() {
     proposition = [];
@@ -446,9 +463,9 @@ function cancelLast() {
             currentRobot.y = proposition[proposition.length-1].line;
         } else {
             var i;
-            for (i=0 ; robots[i].color !== currentRobot.color ;i++);
-            currentRobot.x = robots[i].column;
-            currentRobot.y = robots[i].line;
+            for (i=0 ; startPos[i].color !== currentRobot.color ;i++);
+            currentRobot.x = startPos[i].column;
+            currentRobot.y = startPos[i].line;
         }
         currentRobot.nextX = currentRobot.x;
         currentRobot.nextY = currentRobot.y;
@@ -583,6 +600,8 @@ var gamepadSupport = {
       }
     }
   },onButton: function(event) {
+  	if (! activateEvent)
+        return;
   var button = event.button;
     switch (button){
 		case 0:
