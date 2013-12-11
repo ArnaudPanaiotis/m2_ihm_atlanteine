@@ -157,7 +157,7 @@ function updateRobots(color, x, y) {
             robots[i].column = x;
             robots[i].line = y;
         }
-    }    
+    }
 }
 
 function getRobot(c, l) {
@@ -183,7 +183,7 @@ function selectRobot(x, y) {
     if (proposition.length !== 0 && proposition[proposition.length - 1].command === "select") {
         proposition.pop();
         var lastSelect;
-        for (var i=proposition.length-1 ; i>=0; i--)
+        for (var i = proposition.length - 1; i >= 0; i--)
             if (proposition[i].command === "select") {
                 lastSelect = proposition[i].robot;
                 break;
@@ -346,8 +346,9 @@ function printProposition() {
                 continue;
             color = proposition[i].robot;
             var j;
-            for (j=0 ; startPos[j].color !== proposition[i].robot ; j++);
-            prop.innerHTML += "<tr onmouseover='highlightCell("+startPos[j].column+","+startPos[j].line+",\""+color+"\")' onmouseout='highlightCell("+startPos[j].column+","+startPos[j].line+")' class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+startPos[j].column)+"</td><td>"+(startPos[j].line+1)+"</td></tr>";
+            for (j = 0; startPos[j].color !== proposition[i].robot; j++)
+                ;
+            prop.innerHTML += "<tr onmouseover='highlightCell(" + startPos[j].column + "," + startPos[j].line + ",\"" + color + "\")' onmouseout='highlightCell(" + startPos[j].column + "," + startPos[j].line + ")' class='select' style='border-color:" + color + "'><td style='border-color:" + color + "'>" + String.fromCharCode('A'.charCodeAt(0) + startPos[j].column) + "</td><td>" + (startPos[j].line + 1) + "</td></tr>";
         } else {
             prop.innerHTML += "<tr onmouseover='highlightCell(" + proposition[i].column + "," + proposition[i].line + ",\"" + color + "\")' onmouseout='highlightCell(" + proposition[i].column + "," + proposition[i].line + ")'><td style='border-color:" + color + "'>" + String.fromCharCode('A'.charCodeAt(0) + proposition[i].column) + "</td><td>" + (proposition[i].line + 1) + "</td></tr>";
         }
@@ -396,7 +397,8 @@ function cancelLast() {
             currentRobot.y = proposition[proposition.length - 1].line;
         } else {
             var i;
-            for (i=0 ; startPos[i].color !== currentRobot.color ;i++);
+            for (i = 0; startPos[i].color !== currentRobot.color; i++)
+                ;
             currentRobot.x = startPos[i].column;
             currentRobot.y = startPos[i].line;
         }
@@ -610,8 +612,8 @@ var gamepadSupport = {
      * Stops a polling loop by setting a flag which will prevent the next
      * requestAnimationFrame() from being scheduled.
      */
-     
-     //Non utilisée, devrait etre appelée dans chrome quand on a plus de gamepad mais ca empecherais de rejouer si on debranche et rebranche au cours de la partie
+
+    //Non utilisée, devrait etre appelée dans chrome quand on a plus de gamepad mais ca empecherais de rejouer si on debranche et rebranche au cours de la partie
     stopPolling: function() {
         gamepadSupport.ticking = false;
     },
@@ -708,8 +710,8 @@ var gamepadSupport = {
             }
         }
     },
-            
-     //appelé quand l'état du gamepad a changé
+
+    //appelé quand l'état du gamepad a changé
     updateDisplay: function(gamepadId) {
         if (!activateEvent)
             return;
@@ -812,8 +814,8 @@ var gamepadSupport = {
             if ((axis == 1 || axis == 6) && value == 1) {
                 dir = "down";
             }
-           // if (dir === undefined || !activateEvent)
-              //  return;
+            // if (dir === undefined || !activateEvent)
+            //  return;
             var position = getNext(dir);
             if (position === undefined)
                 return;
@@ -822,3 +824,33 @@ var gamepadSupport = {
     }
 };
 
+var ipadSupport = {
+    init: function() {
+        window.addEventListener('orientationchange', ipadSupport.orientationChanged, false);
+    },
+    orientationChanged: function(event) {
+        var dir;
+        event.preventDefault();
+        switch (window.orientation) {
+            case 0:
+                dir = "down";
+                break;
+            case -90:
+                dir = "right";
+                break;
+            case 90:
+                dir = "left";
+                break;
+            case 180:
+                dir = "up";
+                break;
+            default :
+                break;
+
+        }
+        var position = getNext(dir);
+        if (position === undefined)
+            return;
+        moveRobot(position.c, position.l);
+    }
+}
