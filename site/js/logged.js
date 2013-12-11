@@ -84,17 +84,23 @@ function addFunctionOnClick(cell, x, y, func) {
     };
 }
 
+function removeOut(cell) {
+    cell.onmouseout = undefined;
+}
+
 function addFunctionOnDragDrop(cell, x, y) {
-    if (getRobot(x,y) !== "")
-    {
+       
+        //alert('ajout'+x + y);
         cell.onmousedown = function(e) {
         selectRobot(x, y);
         startDrag(e);
         };
-         cell.onmouseout = function(e) {
+        cell.onmouseout = function(e) {
             dragEnd(e);
-        }; 
-    }
+        };
+        cell.onmouseup = function(e) {
+            removeOut(cell);
+        };
 }
 
 function removeFunctions(cell) {
