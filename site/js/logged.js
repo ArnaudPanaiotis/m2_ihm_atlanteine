@@ -55,10 +55,10 @@ function drawPlateau(dataPlateau) {
     var row = plateau.insertRow(-1);
     row.insertCell(-1);
     for (var x = 0; x < width; x++)
-        row.insertCell(-1).innerHTML = String.fromCharCode('A'.charCodeAt(0)+x);    
+        row.insertCell(-1).innerHTML = String.fromCharCode('A'.charCodeAt(0) + x);
     for (var y = 0; y < height; y++) {
         var row = plateau.insertRow(-1);
-        row.insertCell(-1).innerHTML = y+1;
+        row.insertCell(-1).innerHTML = y + 1;
         for (var x = 0; x < width; x++) {
             var cell = row.insertCell(-1);
             if (dataPlateau[y][x].g)
@@ -76,7 +76,7 @@ function drawPlateau(dataPlateau) {
 }
 
 function getCell(x, y) {
-    return document.getElementById("plateau").rows[y+1].cells[x+1];
+    return document.getElementById("plateau").rows[y + 1].cells[x + 1];
 }
 
 function addFunctionOnClick(cell, x, y, func) {
@@ -218,7 +218,9 @@ function sendProposition() {
                 login: document.getElementById('login').value,
                 idGame: document.getElementById('idGame').value,
                 proposition: JSON.stringify(proposition)},
-            onload: function(){updatePlateau(JSON.parse(this.responseText));}});
+            onload: function() {
+                updatePlateau(JSON.parse(this.responseText));
+            }});
 }
 
 function updatePlateau(answer) {
@@ -255,15 +257,15 @@ function updatePlateau(answer) {
             updateRobots(currentRobot.color, currentRobot.x, currentRobot.y);
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
-                for (var i = 0; i < proposition.length ;i++) {
+                for (var i = 0; i < proposition.length; i++) {
                     if (proposition[i].command === "move")
                         getCell(proposition[i].column, proposition[i].line).onclick = undefined;
                 }
-               for (var i = 0; i < robots.length ;i++) {
+                for (var i = 0; i < robots.length; i++) {
                     getCell(robots[i].column, robots[i].line).onclick = undefined;
                 }
                 var buttons = document.getElementById("partie").getElementsByTagName("button");
-                for (var i=0 ; i<buttons.length ; i++) {
+                for (var i = 0; i < buttons.length; i++) {
                     buttons[i].setAttribute("disabled", "true");
                 }
             } else {
@@ -276,27 +278,27 @@ function updatePlateau(answer) {
 }
 
 var keys = [
-    {key:37, command:"move", action:"left"},
-    {key:38, command:"move", action:"up"},
-    {key:39, command:"move", action:"right"},
-    {key:40, command:"move", action:"down"},
-    {key:65, command:"select", action:"blue"},   // A Q
-    {key:90, command:"select", action:"red"},    // Z W
-    {key:69, command:"select", action:"green"},  // E
-    {key:82, command:"select", action:"yellow"}, // R
-    {key:8,  command:"deleteLast"},              // Del
-    {key:46, command:"deleteAll"},               // Suppr
+    {key: 37, command: "move", action: "left"},
+    {key: 38, command: "move", action: "up"},
+    {key: 39, command: "move", action: "right"},
+    {key: 40, command: "move", action: "down"},
+    {key: 65, command: "select", action: "blue"}, // A Q
+    {key: 90, command: "select", action: "red"}, // Z W
+    {key: 69, command: "select", action: "green"}, // E
+    {key: 82, command: "select", action: "yellow"}, // R
+    {key: 8, command: "deleteLast"}, // Del
+    {key: 46, command: "deleteAll"}, // Suppr
 ];
 
 function getAction(key) {
-    for (var i=0 ; i<keys.length ; i++) {
+    for (var i = 0; i < keys.length; i++) {
         if (keys[i].key === key)
             return keys[i];
     }
 }
 
 function getNext(dir) {
-    for (var i=0 ; i<nextPositions.length ; i++) {
+    for (var i = 0; i < nextPositions.length; i++) {
         if (nextPositions[i].c === currentRobot.x && nextPositions[i].l > currentRobot.y && dir === "down")
             return nextPositions[i];
         if (nextPositions[i].c === currentRobot.x && nextPositions[i].l < currentRobot.y && dir === "up")
@@ -311,12 +313,12 @@ function getNext(dir) {
 function onKey(event) {
     //alert(event.keyCode);
     var key = getAction(event.keyCode);
-    if (key === undefined || ! activateEvent)
+    if (key === undefined || !activateEvent)
         return;
     if (key.command === "select") {
         var robot = getRobotPosition(key.action);
         selectRobot(robot.column, robot.line);
-    } else if (key.command === "move" ) {
+    } else if (key.command === "move") {
         var position = getNext(key.action);
         if (position === undefined)
             return;
@@ -339,7 +341,7 @@ function printProposition() {
     var prop = document.getElementById("proposition");
     var color;
     prop.innerHTML = "";
-    for (var i=0; i <proposition.length ; i++) {
+    for (var i = 0; i < proposition.length; i++) {
         if (proposition[i].command === "select") {
             if (color === proposition[i].robot)
                 continue;
@@ -348,16 +350,16 @@ function printProposition() {
             for (j=0 ; startPos[j].color !== proposition[i].robot ; j++);
             prop.innerHTML += "<tr onmouseover='highlightCell("+startPos[j].column+","+startPos[j].line+",\""+color+"\")' onmouseout='highlightCell("+startPos[j].column+","+startPos[j].line+")' class='select' style='border-color:"+color+"'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+startPos[j].column)+"</td><td>"+(startPos[j].line+1)+"</td></tr>";
         } else {
-            prop.innerHTML += "<tr onmouseover='highlightCell("+proposition[i].column+","+proposition[i].line+",\""+color+"\")' onmouseout='highlightCell("+proposition[i].column+","+proposition[i].line+")'><td style='border-color:"+color+"'>"+String.fromCharCode('A'.charCodeAt(0)+proposition[i].column)+"</td><td>"+(proposition[i].line+1)+"</td></tr>";
+            prop.innerHTML += "<tr onmouseover='highlightCell(" + proposition[i].column + "," + proposition[i].line + ",\"" + color + "\")' onmouseout='highlightCell(" + proposition[i].column + "," + proposition[i].line + ")'><td style='border-color:" + color + "'>" + String.fromCharCode('A'.charCodeAt(0) + proposition[i].column) + "</td><td>" + (proposition[i].line + 1) + "</td></tr>";
         }
     }
-    document.getElementById("around_prop").scrollTop=1000000000;
+    document.getElementById("around_prop").scrollTop = 1000000000;
 }
 
 function highlightCell(x, y, color) {
-    var cell = getCell(x,y);
+    var cell = getCell(x, y);
     if (color !== undefined) {
-        cell.style.outline = "1px solid "+color;
+        cell.style.outline = "1px solid " + color;
     } else {
         cell.style.outline = "";
     }
@@ -370,7 +372,7 @@ function deleteProposition() {
 }
 
 function error(text) {
-    var div=document.getElementById("teuse");
+    var div = document.getElementById("teuse");
     div.innerHTML = text;
     div.style.border = "2px solid red";
 }
@@ -384,15 +386,15 @@ function success(text) {
 function cancelLast() {
     if (proposition.length === 0)
         return;
-    for (var i=0 ; i<nextPositions.length ; i++) {
+    for (var i = 0; i < nextPositions.length; i++) {
         drawNext(nextPositions[i].c, nextPositions[i].l);
     }
-    if (proposition[proposition.length-1].command === "move") {
+    if (proposition[proposition.length - 1].command === "move") {
         proposition.pop();
         drawRobot(currentRobot.x, currentRobot.y);
-        if (proposition.length !== 0 && proposition[proposition.length-1].command === "move") {
-            currentRobot.x = proposition[proposition.length-1].column;
-            currentRobot.y = proposition[proposition.length-1].line;
+        if (proposition.length !== 0 && proposition[proposition.length - 1].command === "move") {
+            currentRobot.x = proposition[proposition.length - 1].column;
+            currentRobot.y = proposition[proposition.length - 1].line;
         } else {
             var i;
             for (i=0 ; startPos[i].color !== currentRobot.color ;i++);
@@ -405,12 +407,13 @@ function cancelLast() {
     } else {
         proposition.pop();
         if (proposition.length !== 0) {
-            currentRobot.x = proposition[proposition.length-1].column;
-            currentRobot.y = proposition[proposition.length-1].line;
+            currentRobot.x = proposition[proposition.length - 1].column;
+            currentRobot.y = proposition[proposition.length - 1].line;
             currentRobot.nextX = currentRobot.x;
             currentRobot.nextY = currentRobot.y;
             var i;
-            for (i = proposition.length-1 ; proposition[i].command !== "select" ; i-- );
+            for (i = proposition.length - 1; proposition[i].command !== "select"; i--)
+                ;
             currentRobot.color = proposition[i].robot;
         }
         //cancelLast();
@@ -420,18 +423,18 @@ function cancelLast() {
 
 function displayWiners(data) {
     var list = document.getElementById("lesParticipants").getElementsByTagName("li");
-    for (var i=0 ; i<data.solutions.length ; i++) {
-        for (var j=0 ; j<list.length ; j++) {
+    for (var i = 0; i < data.solutions.length; i++) {
+        for (var j = 0; j < list.length; j++) {
             if (list[j].innerHTML === data.solutions[i].player) {
                 var len = 0;
-                for (var k=0 ; k<data.solutions[i].proposition.length ;k++) {
+                for (var k = 0; k < data.solutions[i].proposition.length; k++) {
                     if (data.solutions[i].proposition[k].command === "move")
                         len++;
                 }
                 if (len === 1)
                     list[j].innerHTML += " a gagné en 1 déplacement.";
                 else
-                    list[j].innerHTML += " a gagné en "+len+" déplacements.";
+                    list[j].innerHTML += " a gagné en " + len + " déplacements.";
             }
         }
     }
@@ -506,316 +509,342 @@ function addNextGameButton() {
  */
 
 var gamepadSupport = {
-  // A number of typical buttons recognized by Gamepad API and mapped to
-  // standard controls. Any extraneous buttons will have larger indexes.
-  TYPICAL_BUTTON_COUNT: 16,
+// A number of typical buttons recognized by Gamepad API and mapped to
+// standard controls. Any extraneous buttons will have larger indexes.
+    TYPICAL_BUTTON_COUNT: 16,
+    // A number of typical axes recognized by Gamepad API and mapped to
+    // standard controls. Any extraneous buttons will have larger indexes.
+    TYPICAL_AXIS_COUNT: 4,
+    // Whether we’re requestAnimationFrameing like it’s 1999.
+    ticking: false,
+    // The canonical list of attached gamepads, without “holes” (always
+    // starting at [0]) and unified between Firefox and Chrome.
+    gamepads: [],
+    // Remembers the connected gamepads at the last check; used in Chrome
+    // to figure out when gamepads get connected or disconnected, since no
+    // events are fired.
+    prevRawGamepadTypes: [],
+    // Previous timestamps for gamepad state; used in Chrome to not bother with
+    // analyzing the polled data if nothing changed (timestamp is the same
+    // as last time).
+    prevTimestamps: [],
+    /**
+     * Initialize support for Gamepad API.
+     */
+    init: function() {
+        // As of writing, it seems impossible to detect Gamepad API support
+        // in Firefox, hence we need to hardcode it in the third clause.
+        // (The preceding two clauses are for Chrome.)
+        var gamepadSupportAvailable = !!navigator.webkitGetGamepads ||
+                !!navigator.webkitGamepads ||
+                (navigator.userAgent.indexOf('Firefox/') != -1);
 
-  // A number of typical axes recognized by Gamepad API and mapped to
-  // standard controls. Any extraneous buttons will have larger indexes.
-  TYPICAL_AXIS_COUNT: 4,
+        if (gamepadSupportAvailable) {
+            // Firefox supports the connect/disconnect event, so we attach event
+            // handlers to those.
 
-  // Whether we’re requestAnimationFrameing like it’s 1999.
-  ticking: false,
+            window.addEventListener('MozGamepadConnected', gamepadSupport.onConnect, false);
 
-  // The canonical list of attached gamepads, without “holes” (always
-  // starting at [0]) and unified between Firefox and Chrome.
-  gamepads: [],
+            // Since Chrome only supports polling, we initiate polling loop straight
+            // away. For Firefox, we will only do it if we get a connect event.
+            if (!!navigator.webkitGamepads || !!navigator.webkitGetGamepads) {
 
-  // Remembers the connected gamepads at the last check; used in Chrome
-  // to figure out when gamepads get connected or disconnected, since no
-  // events are fired.
-  prevRawGamepadTypes: [],
+                var rawGamepads =
+                        (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
+                        navigator.webkitGamepads;
+                for (var i = 0; i < rawGamepads.length; i++) {
+                    if (rawGamepads[i]) {
+                        gamepadSupport.gamepads.push(rawGamepads[i]);
+                    }
 
-  // Previous timestamps for gamepad state; used in Chrome to not bother with
-  // analyzing the polled data if nothing changed (timestamp is the same
-  // as last time).
-  prevTimestamps: [],
+                }
+                gamepadSupport.startPolling();
+            }
+        }
+    }, onConnect: function(event) {
 
-  /**
-   * Initialize support for Gamepad API.
-   */
-  init: function() {
-    // As of writing, it seems impossible to detect Gamepad API support
-    // in Firefox, hence we need to hardcode it in the third clause.
-    // (The preceding two clauses are for Chrome.)
-    var gamepadSupportAvailable = !!navigator.webkitGetGamepads ||
-        !!navigator.webkitGamepads ||
-        (navigator.userAgent.indexOf('Firefox/') != -1);
+        window.addEventListener('MozGamepadButtonDown', gamepadSupport.onButton, false);
+        window.addEventListener("MozGamepadAxisMove", gamepadSupport.onAxis, false);
 
-    if (gamepadSupportAvailable) {
-      // Firefox supports the connect/disconnect event, so we attach event
-      // handlers to those.
-		window.addEventListener('MozGamepadConnected',gamepadSupport.onGamepadConnect, false);
-		window.addEventListener('MozGamepadDisconnected',gamepadSupport.onGamepadDisconnect, false);
-							  
-		window.addEventListener('MozGamepadButtonDown',gamepadSupport.onButton,false);
-		window.addEventListener("MozGamepadAxisMove", gamepadSupport.onAxis, false);
-		
-      // Since Chrome only supports polling, we initiate polling loop straight
-      // away. For Firefox, we will only do it if we get a connect event.
-      if (!!navigator.webkitGamepads || !!navigator.webkitGetGamepads) {
-        gamepadSupport.startPolling();
-		
-      }
-    }
-  },onButton: function(event) {
-  	if (! activateEvent)
-        return;
-  var button = event.button;
-    switch (button){
-		case 0:
-		var robot = getRobotPosition("green");
-        selectRobot(robot.column, robot.line);
-		break;
-		case 1:
-		var robot = getRobotPosition("red");
-        selectRobot(robot.column, robot.line);
-		break;
-		case 2:
-		var robot = getRobotPosition("blue");
-        selectRobot(robot.column, robot.line);
-		break;
-		case 3:
-		var robot = getRobotPosition("yellow");
-        selectRobot(robot.column, robot.line);
-		break;
-		case 6:
-		cancelLast();
-		break;
-		case 7:	
-		deleteProposition();
-		break;
-		default:
-		break;
-		}
-	
-},onAxis: function(event) {
-  var axis = event.axis;
-  var value = event.value;
+    }, onButton: function(event) {
 
-  //alert(axis +" "+value);
-  var dir;
-	if ((axis == 0 || axis == 5 )&& value == -1){
-		dir = "left";
-		}
-	if ((axis == 0 || axis == 5 )&& value == 1){
-		dir="right";
-		}
-	if ((axis == 1 || axis == 6)&& value == -1){
-		dir="up";
-		}
-	if ((axis == 1 || axis == 6)&& value == 1){
-		dir="down";
-		}
-	if (dir === undefined || ! activateEvent)
-        return;
-		var position = getNext(dir);
+        if (!activateEvent)
+            return;
+        var button = event.button;
+        switch (button) {
+            case 0:
+                var robot = getRobotPosition("green");
+                selectRobot(robot.column, robot.line);
+                break;
+            case 1:
+                var robot = getRobotPosition("red");
+                selectRobot(robot.column, robot.line);
+                break;
+            case 2:
+                var robot = getRobotPosition("blue");
+                selectRobot(robot.column, robot.line);
+                break;
+            case 3:
+                var robot = getRobotPosition("yellow");
+                selectRobot(robot.column, robot.line);
+                break;
+            case 6:
+                cancelLast();
+                break;
+            case 7:
+                deleteProposition();
+                break;
+            default:
+                break;
+        }
+
+    }, onAxis: function(event) {
+        var axis = event.axis;
+        var value = event.value;
+
+        //alert(axis +" "+value);
+        var dir;
+        if ((axis == 0 || axis == 5) && value == -1) {
+            dir = "left";
+        }
+        if ((axis == 0 || axis == 5) && value == 1) {
+            dir = "right";
+        }
+        if ((axis == 1 || axis == 6) && value == -1) {
+            dir = "up";
+        }
+        if ((axis == 1 || axis == 6) && value == 1) {
+            dir = "down";
+        }
+        if (dir === undefined || !activateEvent)
+            return;
+        var position = getNext(dir);
         if (position === undefined)
             return;
         moveRobot(position.c, position.l);
-	
-},
 
-  /**
-   * React to the gamepad being connected. Today, this will only be executed
-   * on Firefox.
-   */
-  onGamepadConnect: function(event) {
+    },
+    /**
+     * Starts a polling loop to check for gamepad state.
+     */
+    startPolling: function() {
+        // Don’t accidentally start a second loop, man.
+        if (!gamepadSupport.ticking) {
+            gamepadSupport.ticking = true;
+            gamepadSupport.tick();
+        }
+    },
+    /**
+     * Stops a polling loop by setting a flag which will prevent the next
+     * requestAnimationFrame() from being scheduled.
+     */
+     
+     //Non utilisée, devrait etre appelée dans chrome quand on a plus de gamepad mais ca empecherais de rejouer si on debranche et rebranche au cours de la partie
+    stopPolling: function() {
+        gamepadSupport.ticking = false;
+    },
+    /**
+     * A function called with each requestAnimationFrame(). Polls the gamepad
+     * status and schedules another poll.
+     */
+    tick: function() {
+        gamepadSupport.pollStatus();
+        gamepadSupport.scheduleNextTick();
+    },
+    scheduleNextTick: function() {
+        // Only schedule the next frame if we haven’t decided to stop via
+        // stopPolling() before.
+        if (gamepadSupport.ticking) {
+            if (window.requestAnimationFrame) {
+                window.requestAnimationFrame(gamepadSupport.tick);
+            } else if (window.mozRequestAnimationFrame) {
+                window.mozRequestAnimationFrame(gamepadSupport.tick);
+            } else if (window.webkitRequestAnimationFrame) {
+                window.webkitRequestAnimationFrame(gamepadSupport.tick);
+            }
+            // Note lack of setTimeout since all the browsers that support
+            // Gamepad API are already supporting requestAnimationFrame().
+        }
+    },
+    /**
+     * Checks for the gamepad status. Monitors the necessary data and notices
+     * the differences from previous state (buttons for Chrome/Firefox,
+     * new connects/disconnects for Chrome). If differences are noticed, asks
+     * to update the display accordingly. Should run as close to 60 frames per
+     * second as possible.
+     */
+    pollStatus: function() {
+        // Poll to see if gamepads are connected or disconnected. Necessary
+        // only on Chrome.
+        gamepadSupport.pollGamepads();
+        for (var i in gamepadSupport.gamepads) {
+            var gamepad = gamepadSupport.gamepads[i];
 
-    // Add the new gamepad on the list of gamepads to look after.
-    gamepadSupport.gamepads.push(event.gamepad);
-    // Ask the tester to update the screen to show more gamepads.
-    //tester.updateGamepads(gamepadSupport.gamepads);
+            // Don’t do anything if the current timestamp is the same as previous
+            // one, which means that the state of the gamepad hasn’t changed.
+            // This is only supported by Chrome right now, so the first check
+            // makes sure we’re not doing anything if the timestamps are empty
+            // or undefined.
+            if (gamepad.timestamp &&
+                    (gamepad.timestamp == gamepadSupport.prevTimestamps[i])) {
+                continue;
+            }
+            gamepadSupport.prevTimestamps[i] = gamepad.timestamp;
 
-    // Start the polling loop to monitor button changes.
-    gamepadSupport.startPolling();
-  },
+            gamepadSupport.updateDisplay(i);
+        }
+    },
+    // This function is called only on Chrome, which does not yet support
+    // connection/disconnection events, but requires you to monitor
+    // an array for changes.
+    pollGamepads: function() {
+        // Get the array of gamepads – the first method (function call)
+        // is the most modern one, the second is there for compatibility with
+        // slightly older versions of Chrome, but it shouldn’t be necessary
+        // for long.
+        var rawGamepads =
+                (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
+                navigator.webkitGamepads;
 
-  // This will only be executed on Firefox.
-  onGamepadDisconnect: function(event) {
-    // Remove the gamepad from the list of gamepads to monitor.
-    for (var i in gamepadSupport.gamepads) {
-      if (gamepadSupport.gamepads[i].index == event.gamepad.index) {
-        gamepadSupport.gamepads.splice(i, 1);
-        break;
-      }
-    }
+        if (rawGamepads) {
+            // We don’t want to use rawGamepads coming straight from the browser,
+            // since it can have “holes” (e.g. if you plug two gamepads, and then
+            // unplug the first one, the remaining one will be at index [1]).
+            gamepadSupport.gamepads = [];
 
-    // If no gamepads are left, stop the polling loop.
-    if (gamepadSupport.gamepads.length == 0) {
-      gamepadSupport.stopPolling();
-    }
+            // We only refresh the display when we detect some gamepads are new
+            // or removed; we do it by comparing raw gamepad table entries to
+            // “undefined.”
+            var gamepadsChanged = false;
 
-    // Ask the tester to update the screen to remove the gamepad.
-    //tester.updateGamepads(gamepadSupport.gamepads);
-  },
+            for (var i = 0; i < rawGamepads.length; i++) {
 
-  /**
-   * Starts a polling loop to check for gamepad state.
-   */
-  startPolling: function() {
-    // Don’t accidentally start a second loop, man.
-    if (!gamepadSupport.ticking) {
-      gamepadSupport.ticking = true;
-      gamepadSupport.tick();
-    }
-  },
+                if (typeof rawGamepads[i] != gamepadSupport.prevRawGamepadTypes[i]) {
+                    gamepadsChanged = true;
+                    gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
+                }
 
-  /**
-   * Stops a polling loop by setting a flag which will prevent the next
-   * requestAnimationFrame() from being scheduled.
-   */
-  stopPolling: function() {
-    gamepadSupport.ticking = false;
-  },
+                if (rawGamepads[i]) {
+                    gamepadSupport.gamepads.push(rawGamepads[i]);
+                }
+            }
 
-  /**
-   * A function called with each requestAnimationFrame(). Polls the gamepad
-   * status and schedules another poll.
-   */
-  tick: function() {
-    gamepadSupport.pollStatus();
-    gamepadSupport.scheduleNextTick();
-  },
+            // Ask the tester to refresh the visual representations of gamepads
+            // on the screen.
+            if (gamepadsChanged) {
+                //tester.updateGamepads(gamepadSupport.gamepads);
+            }
+        }
+    },
+            
+     //appelé quand l'état du gamepad a changé
+    updateDisplay: function(gamepadId) {
+        if (!activateEvent)
+            return;
 
-  scheduleNextTick: function() {
-    // Only schedule the next frame if we haven’t decided to stop via
-    // stopPolling() before.
-    if (gamepadSupport.ticking) {
-      if (window.requestAnimationFrame) {
-        window.requestAnimationFrame(gamepadSupport.tick);
-      } else if (window.mozRequestAnimationFrame) {
-        window.mozRequestAnimationFrame(gamepadSupport.tick);
-      } else if (window.webkitRequestAnimationFrame) {
-        window.webkitRequestAnimationFrame(gamepadSupport.tick);
-      }
-      // Note lack of setTimeout since all the browsers that support
-      // Gamepad API are already supporting requestAnimationFrame().
-    }
-  },
 
-  /**
-   * Checks for the gamepad status. Monitors the necessary data and notices
-   * the differences from previous state (buttons for Chrome/Firefox,
-   * new connects/disconnects for Chrome). If differences are noticed, asks
-   * to update the display accordingly. Should run as close to 60 frames per
-   * second as possible.
-   */
-  pollStatus: function() {
-    // Poll to see if gamepads are connected or disconnected. Necessary
-    // only on Chrome.
-    gamepadSupport.pollGamepads();
+        var gamepad = gamepadSupport.gamepads[gamepadId];
+//recup bouton
+        var button;
+        if (gamepad.buttons[0])
+            button = 0;
+        if (gamepad.buttons[1])
+            button = 1;
+        if (gamepad.buttons[2])
+            button = 2;
+        if (gamepad.buttons[3])
+            button = 3;
+        if (gamepad.buttons[8])
+            button = 8;
+        if (gamepad.buttons[9])
+            button = 9;
 
-    for (var i in gamepadSupport.gamepads) {
-      var gamepad = gamepadSupport.gamepads[i];
-
-      // Don’t do anything if the current timestamp is the same as previous
-      // one, which means that the state of the gamepad hasn’t changed.
-      // This is only supported by Chrome right now, so the first check
-      // makes sure we’re not doing anything if the timestamps are empty
-      // or undefined.
-      if (gamepad.timestamp &&
-          (gamepad.timestamp == gamepadSupport.prevTimestamps[i])) {
-        continue;
-      }
-      gamepadSupport.prevTimestamps[i] = gamepad.timestamp;
-
-      gamepadSupport.updateDisplay(i);
-    }
-  },
-
-  // This function is called only on Chrome, which does not yet support
-  // connection/disconnection events, but requires you to monitor
-  // an array for changes.
-  pollGamepads: function() {
-
-    // Get the array of gamepads – the first method (function call)
-    // is the most modern one, the second is there for compatibility with
-    // slightly older versions of Chrome, but it shouldn’t be necessary
-    // for long.
-    var rawGamepads =
-        (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
-        navigator.webkitGamepads;
-
-    if (rawGamepads) {
-      // We don’t want to use rawGamepads coming straight from the browser,
-      // since it can have “holes” (e.g. if you plug two gamepads, and then
-      // unplug the first one, the remaining one will be at index [1]).
-      gamepadSupport.gamepads = [];
-
-      // We only refresh the display when we detect some gamepads are new
-      // or removed; we do it by comparing raw gamepad table entries to
-      // “undefined.”
-      var gamepadsChanged = false;
-
-      for (var i = 0; i < rawGamepads.length; i++) {
-        if (typeof rawGamepads[i] != gamepadSupport.prevRawGamepadTypes[i]) {
-          gamepadsChanged = true;
-          gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
+//traitement bouton
+        if (button != undefined && activateEvent) {
+            switch (button) {
+                case 0:
+                    var robot = getRobotPosition("green");
+                    selectRobot(robot.column, robot.line);
+                    break;
+                case 1:
+                    var robot = getRobotPosition("red");
+                    selectRobot(robot.column, robot.line);
+                    break;
+                case 2:
+                    var robot = getRobotPosition("blue");
+                    selectRobot(robot.column, robot.line);
+                    break;
+                case 3:
+                    var robot = getRobotPosition("yellow");
+                    selectRobot(robot.column, robot.line);
+                    break;
+                case 8:
+                    cancelLast();
+                    break;
+                case 9:
+                    deleteProposition();
+                    break;
+                default:
+                    break;
+            }
         }
 
-        if (rawGamepads[i]) {
-          gamepadSupport.gamepads.push(rawGamepads[i]);
+        //recup stick
+        var axis;
+        var value;
+        if (gamepad.axes[0] == 1 || gamepad.axes[0] == -1) {
+            axis = 0;
+            if (gamepad.axes[0] == 1)
+                value = 1;
+            else
+                value = -1;
         }
-      }
 
-      // Ask the tester to refresh the visual representations of gamepads
-      // on the screen.
-      if (gamepadsChanged) {
-        tester.updateGamepads(gamepadSupport.gamepads);
-      }
+        if (gamepad.axes[1] == 1 || gamepad.axes[1] == -1) {
+            axis = 1;
+            if (gamepad.axes[1] == 1)
+                value = 1;
+            else
+                value = -1;
+        }
+
+        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
+            axis = 5;
+            if (gamepad.axes[5] == 1)
+                value = 1;
+            else
+                value = -1;
+        }
+
+        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
+            axis = 6;
+            if (gamepad.axes[6] == 1)
+                value = 1;
+            else
+                value = -1;
+        }
+
+        //traitement dir
+        if (axis != undefined && activateEvent) {
+            var dir;
+            if ((axis == 0 || axis == 5) && value == -1) {
+                dir = "left";
+            }
+            if ((axis == 0 || axis == 5) && value == 1) {
+                dir = "right";
+            }
+            if ((axis == 1 || axis == 6) && value == -1) {
+                dir = "up";
+            }
+            if ((axis == 1 || axis == 6) && value == 1) {
+                dir = "down";
+            }
+           // if (dir === undefined || !activateEvent)
+              //  return;
+            var position = getNext(dir);
+            if (position === undefined)
+                return;
+            moveRobot(position.c, position.l);
+        }
     }
-  },
-
-  // Call the tester with new state and ask it to update the visual
-  // representation of a given gamepad.
-  updateDisplay: function(gamepadId) {
-    var gamepad = gamepadSupport.gamepads[gamepadId];
-    // Update all the buttons (and their corresponding labels) on screen.
-    // tester.updateButton(gamepad.buttons[0], gamepadId, 'button-1');
-    // tester.updateButton(gamepad.buttons[1], gamepadId, 'button-2');
-    // tester.updateButton(gamepad.buttons[2], gamepadId, 'button-3');
-    // tester.updateButton(gamepad.buttons[3], gamepadId, 'button-4');
-
-    // tester.updateButton(gamepad.buttons[4], gamepadId,
-        // 'button-left-shoulder-top');
-    // tester.updateButton(gamepad.buttons[6], gamepadId,
-        // 'button-left-shoulder-bottom');
-    // tester.updateButton(gamepad.buttons[5], gamepadId,
-        // 'button-right-shoulder-top');
-    // tester.updateButton(gamepad.buttons[7], gamepadId,
-        // 'button-right-shoulder-bottom');
-
-    // tester.updateButton(gamepad.buttons[8], gamepadId, 'button-select');
-    // tester.updateButton(gamepad.buttons[9], gamepadId, 'button-start');
-
-    // tester.updateButton(gamepad.buttons[10], gamepadId, 'stick-1');
-    // tester.updateButton(gamepad.buttons[11], gamepadId, 'stick-2');
-
-    // tester.updateButton(gamepad.buttons[12], gamepadId, 'button-dpad-top');
-    // tester.updateButton(gamepad.buttons[13], gamepadId, 'button-dpad-bottom');
-    // tester.updateButton(gamepad.buttons[14], gamepadId, 'button-dpad-left');
-    // tester.updateButton(gamepad.buttons[15], gamepadId, 'button-dpad-right');
-
-    // Update all the analogue sticks.
-    // tester.updateAxis(gamepad.axes[0], gamepadId,
-        // 'stick-1-axis-x', 'stick-1', true);
-    // tester.updateAxis(gamepad.axes[1], gamepadId,
-        // 'stick-1-axis-y', 'stick-1', false);
-    // tester.updateAxis(gamepad.axes[2], gamepadId,
-        // 'stick-2-axis-x', 'stick-2', true);
-    // tester.updateAxis(gamepad.axes[3], gamepadId,
-        // 'stick-2-axis-y', 'stick-2', false);
-
-    // Update extraneous buttons.
-
-    }
-
-    // Update extraneous axes.
-    // while (typeof gamepad.axes[extraAxisId] != 'undefined') {
-      // tester.updateAxis(gamepad.axes[extraAxisId], gamepadId,
-          // 'extra-axis-' + extraAxisId);
-
-      // extraAxisId++;
-    // }
-  };
+};
