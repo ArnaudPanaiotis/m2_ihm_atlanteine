@@ -17,7 +17,15 @@ function init() {
 
 function startGame(gameId) {
     document.getElementById("idGame").value = gameId;
-    document.getElementById("nouvellePartie").submit();
+    if (check())
+        document.getElementById("nouvellePartie").submit();
 }
 
+function check() {
+    if (document.getElementById("login").value === "") {
+        alert("Indiquez un identifiant.");
+        return false;
+    }
+    return true;
+}
 

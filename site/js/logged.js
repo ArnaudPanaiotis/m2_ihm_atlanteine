@@ -35,6 +35,7 @@ function init() {
         h1 = document.querySelector('body > header > h1');
         h1.innerHTML += ' est terminée !';
 //        alert(JSON.stringify(data));
+        addNextGameButton();
     });
     socket.on('solutions', function(data) {
         console.log("Solutions are :\n" + JSON.stringify(data.solutions));
@@ -68,7 +69,7 @@ function drawPlateau(dataPlateau) {
                 cell.style.borderTop = "2px black solid";
             if (dataPlateau[y][x].b)
                 cell.style.borderBottom = "2px black solid";
-            cell.oncklick = undefined;
+            cell.onclick = undefined;
             cell.style.background = "";
         }
     }
@@ -84,16 +85,41 @@ function addFunctionOnClick(cell, x, y, func) {
     };
 }
 
+function removeOut(cell) {
+    cell.onmouseout = undefined;
+}
+
+function addFunctionOnDragDrop(cell, x, y) {
+       
+        //alert('ajout'+x + y);
+        cell.onmousedown = function(e) {
+        selectRobot(x, y);
+        startDrag(e);
+        };
+        cell.onmouseout = function(e) {
+            dragEnd(e);
+        };
+        cell.onmouseup = function(e) {
+            removeOut(cell);
+        };
+}
+
+function removeFunctions(cell) {
+    cell.onclick = undefined;
+    cell.onmousedown = undefined;
+    cell.onmouseout = undefined;
+}
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
 // drawRobot(x, y)        efface un robot dans la case (x,y)
 function drawRobot(x, y, color) {
     var cell = getCell(x, y);
     if (color === undefined) {
-        cell.onclick = undefined;
+        removeFunctions(cell);
         cell.style.background = "";
     } else {
         cell.style.background = "url('robot.png') " + color;
-        addFunctionOnClick(cell, x, y, selectRobot);
+        //addFunctionOnClick(cell, x, y, selectRobot);
+        addFunctionOnDragDrop(cell, x, y);
     }
 }
 
@@ -117,7 +143,7 @@ function drawNext(x, y, color) {
     var cell = getCell(x, y);
     if (color === undefined) {
         cell.style.background = "";
-        cell.onclick = undefined;
+        removeFunctions(cell);
     } else {
         cell.style.background = color;
         addFunctionOnClick(cell, x, y, moveRobot);
@@ -132,9 +158,59 @@ var nextPositions = [];
 var initGame;
 var target;
 var activateEvent = true;
+var dragStart = {};
+
+
+function startDrag(e) {
+	if (!e) var e = window.event;
+	if (e.pageX || e.pageY) 	{
+		dragStart.x = e.pageX;
+		dragStart.y = e.pageY;
+	}
+	else if (e.clientX || e.clientY) 	{
+		dragStart.x = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		dragStart.y = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+}
+
+
+function dragEnd(e) {
+        var x;
+        var y;
+	if (!e) var e = window.event;
+	if (e.pageX || e.pageY) 	{
+		x = e.pageX;
+		y = e.pageY;
+	}
+	else if (e.clientX || e.clientY){
+		x = e.clientX + document.body.scrollLeft
+			+ document.documentElement.scrollLeft;
+		y = e.clientY + document.body.scrollTop
+			+ document.documentElement.scrollTop;
+	}
+        var dir;
+        
+        if (Math.abs(x-dragStart.x) > Math.abs(y-dragStart.y) && x-dragStart.x < 0 ){
+		dir = "left";
+		}
+	if (Math.abs(x-dragStart.x) > Math.abs(y-dragStart.y) && x-dragStart.x > 0 ){
+		dir="right";
+		}
+	if (Math.abs(x-dragStart.x) < Math.abs(y-dragStart.y) && y-dragStart.y < 0 ){
+		dir="up";
+		}
+	if (Math.abs(x-dragStart.x) < Math.abs(y-dragStart.y) && y-dragStart.y > 0 ){
+		dir="down";
+        }
+       var position = getNext(dir);
+        if (position === undefined)
+            return;
+        moveRobot(position.c, position.l);
+}
 
 function drawGame(gameJson) {
-//    alert(gameJson);
     if (gameJson === undefined)
         gameJson = initGame;
     else
@@ -258,10 +334,10 @@ function updatePlateau(answer) {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length; i++) {
                     if (proposition[i].command === "move")
-                        getCell(proposition[i].column, proposition[i].line).onclick = undefined;
+                        removeFunctions(getCell(proposition[i].column, proposition[i].line));
                 }
-                for (var i = 0; i < robots.length; i++) {
-                    getCell(robots[i].column, robots[i].line).onclick = undefined;
+               for (var i = 0; i < robots.length ;i++) {
+                    removeFunctions(getCell(robots[i].column, robots[i].line));
                 }
                 var buttons = document.getElementById("partie").getElementsByTagName("button");
                 for (var i = 0; i < buttons.length; i++) {
@@ -277,16 +353,17 @@ function updatePlateau(answer) {
 }
 
 var keys = [
-    {key: 37, command: "move", action: "left"},
-    {key: 38, command: "move", action: "up"},
-    {key: 39, command: "move", action: "right"},
-    {key: 40, command: "move", action: "down"},
-    {key: 65, command: "select", action: "blue"}, // A Q
-    {key: 90, command: "select", action: "red"}, // Z W
-    {key: 69, command: "select", action: "green"}, // E
+    {key: 37, command: "move",   action: "left"},
+    {key: 38, command: "move",   action: "up"},
+    {key: 39, command: "move",   action: "right"},
+    {key: 40, command: "move",   action: "down"},
+    {key: 65, command: "select", action: "blue"},   // A Q
+    {key: 90, command: "select", action: "red"},    // Z W
+    {key: 69, command: "select", action: "green"},  // E
     {key: 82, command: "select", action: "yellow"}, // R
-    {key: 8, command: "deleteLast"}, // Del
-    {key: 46, command: "deleteAll"}, // Suppr
+    {key: 8,  command: "deleteLast"},               // Del
+    {key: 46, command: "deleteAll"},                // Suppr
+    {key: 32, command: "nextGame"},                 // Enter
 ];
 
 function getAction(key) {
@@ -310,22 +387,32 @@ function getNext(dir) {
 }
 
 function onKey(event) {
-    //alert(event.keyCode);
+//    alert(event.keyCode);
     var key = getAction(event.keyCode);
-    if (key === undefined || !activateEvent)
+    if (key === undefined || !activateEvent && !key.command === "nextGame")
         return;
-    if (key.command === "select") {
-        var robot = getRobotPosition(key.action);
-        selectRobot(robot.column, robot.line);
-    } else if (key.command === "move") {
-        var position = getNext(key.action);
-        if (position === undefined)
-            return;
-        moveRobot(position.c, position.l);
-    } else if (key.command === "deleteLast") {
-        cancelLast();
-    } else if (key.command === "deleteAll") {
-        deleteProposition();
+//    alert(key.command);
+    switch (key.command) {
+        case "select":
+            var robot = getRobotPosition(key.action);
+            selectRobot(robot.column, robot.line);
+        break;
+        case "move":
+            var position = getNext(key.action);
+            if (position === undefined)
+                return;
+            moveRobot(position.c, position.l);
+        break;
+        case "deleteLast":
+            cancelLast();
+        break;
+        case "deleteAll":
+            deleteProposition();
+        break;
+        case "nextGame":
+            if (nextGameButtonPresent)
+                document.getElementById("nextGame").submit();
+        break;
     }
     if (event.preventDefault)
     {
@@ -439,6 +526,9 @@ function displayWiners(data) {
             }
         }
     }
+    if (data.solutions.length === list.length) {
+        addNextGameButton();
+    }
 }
 
 function setCountdown(data) {
@@ -460,7 +550,31 @@ function setCountdown(data) {
     interval = setInterval(countdown, 1000);
 }
 
+function nextGame() {
+    var match = document.getElementById('idGame').value.match(/:[0-9]+$/);
+    var n;
+    if (match === null)
+        n = 1;
+    else
+        n = parseInt(match[0].substr(1)) + 1;
+    return document.getElementById('idGame').value.replace(/:[0-9]+$/, "") + ":" + n;
+}
 
+var nextGameButtonPresent = false;
+
+function addNextGameButton() {
+    if (nextGameButtonPresent)
+        return;
+    nextGameButtonPresent = true;
+    var form = document.createElement('form');
+    document.getElementById("main").appendChild(form);
+    form.action = ".";
+    form.method = "POST";
+    form.id = "nextGame";
+    form.innerHTML += "<input type='hidden' name='idGame' value='"+nextGame()+"'/>";
+    form.innerHTML += "<input type='hidden' name='login' value='"+document.getElementById('login').value+"'/>";
+    form.innerHTML += "<input type='submit' value='Partie suivante'/>";
+}
 
 ///////////////
 //GAMEPAD
@@ -797,7 +911,6 @@ var gamepadSupport = {
             else
                 value = -1;
         }
-
 
         //traitement dir
         if (axis != undefined && activateEvent) {
