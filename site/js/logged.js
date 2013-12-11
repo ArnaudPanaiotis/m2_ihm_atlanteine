@@ -278,16 +278,17 @@ function updatePlateau(answer) {
 }
 
 var keys = [
-    {key: 37, command: "move", action: "left"},
-    {key: 38, command: "move", action: "up"},
-    {key: 39, command: "move", action: "right"},
-    {key: 40, command: "move", action: "down"},
-    {key: 65, command: "select", action: "blue"}, // A Q
-    {key: 90, command: "select", action: "red"}, // Z W
-    {key: 69, command: "select", action: "green"}, // E
+    {key: 37, command: "move",   action: "left"},
+    {key: 38, command: "move",   action: "up"},
+    {key: 39, command: "move",   action: "right"},
+    {key: 40, command: "move",   action: "down"},
+    {key: 65, command: "select", action: "blue"},   // A Q
+    {key: 90, command: "select", action: "red"},    // Z W
+    {key: 69, command: "select", action: "green"},  // E
     {key: 82, command: "select", action: "yellow"}, // R
-    {key: 8, command: "deleteLast"}, // Del
-    {key: 46, command: "deleteAll"}, // Suppr
+    {key: 8,  command: "deleteLast"},               // Del
+    {key: 46, command: "deleteAll"},                // Suppr
+    {key: 32, command: "nextGame"},                 // Enter
 ];
 
 function getAction(key) {
@@ -311,22 +312,32 @@ function getNext(dir) {
 }
 
 function onKey(event) {
-    //alert(event.keyCode);
+//    alert(event.keyCode);
     var key = getAction(event.keyCode);
-    if (key === undefined || !activateEvent)
+    if (key === undefined || !activateEvent && !key.command === "nextGame")
         return;
-    if (key.command === "select") {
-        var robot = getRobotPosition(key.action);
-        selectRobot(robot.column, robot.line);
-    } else if (key.command === "move") {
-        var position = getNext(key.action);
-        if (position === undefined)
-            return;
-        moveRobot(position.c, position.l);
-    } else if (key.command === "deleteLast") {
-        cancelLast();
-    } else if (key.command === "deleteAll") {
-        deleteProposition();
+//    alert(key.command);
+    switch (key.command) {
+        case "select":
+            var robot = getRobotPosition(key.action);
+            selectRobot(robot.column, robot.line);
+        break;
+        case "move":
+            var position = getNext(key.action);
+            if (position === undefined)
+                return;
+            moveRobot(position.c, position.l);
+        break;
+        case "deleteLast":
+            cancelLast();
+        break;
+        case "deleteAll":
+            deleteProposition();
+        break;
+        case "nextGame":
+            if (nextGameButtonPresent)
+                document.getElementById("nextGame").submit();
+        break;
     }
     if (event.preventDefault)
     {
