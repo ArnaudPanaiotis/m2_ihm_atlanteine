@@ -352,7 +352,8 @@ var RRServer = {
         }
         , TerminateGame: function(idGame) {
             if (this.list[idGame] == undefined) {
-                throw new Error('NO_SUCH_GAME_ID');
+                //throw new Error('NO_SUCH_GAME_ID');
+                return;
             }
             this.emit(idGame, 'TerminateGame', {TerminateGame: true});
             this.list[idGame].Terminated = true;

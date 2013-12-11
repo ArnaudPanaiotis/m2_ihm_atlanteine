@@ -35,6 +35,7 @@ function init() {
         h1 = document.querySelector('body > header > h1');
         h1.innerHTML += ' est terminée !';
 //        alert(JSON.stringify(data));
+        addNextGameButton();
     });
     socket.on('solutions', function(data) {
         console.log("Solutions are :\n" + JSON.stringify(data.solutions));
@@ -434,6 +435,9 @@ function displayWiners(data) {
             }
         }
     }
+    if (data.solutions.length === list.length) {
+        addNextGameButton();
+    }
 }
 
 function setCountdown(data) {
@@ -455,7 +459,31 @@ function setCountdown(data) {
     interval = setInterval(countdown, 1000);
 }
 
+function nextGame() {
+    var match = document.getElementById('idGame').value.match(/:[0-9]+$/);
+    var n;
+    if (match === null)
+        n = 1;
+    else
+        n = parseInt(match[0].substr(1)) + 1;
+    return document.getElementById('idGame').value.replace(/:[0-9]+$/, "") + ":" + n;
+}
 
+var nextGameButtonPresent = false;
+
+function addNextGameButton() {
+    if (nextGameButtonPresent)
+        return;
+    nextGameButtonPresent = true;
+    var form = document.createElement('form');
+    document.getElementById("main").appendChild(form);
+    form.action = ".";
+    form.method = "POST";
+    form.id = "nextGame";
+    form.innerHTML += "<input type='hidden' name='idGame' value='"+nextGame()+"'/>";
+    form.innerHTML += "<input type='hidden' name='login' value='"+document.getElementById('login').value+"'/>";
+    form.innerHTML += "<input type='submit' value='Partie suivante'/>";
+}
 
 ///////////////
 //GAMEPAD
@@ -791,4 +819,3 @@ var gamepadSupport = {
       // extraAxisId++;
     // }
   };
-
