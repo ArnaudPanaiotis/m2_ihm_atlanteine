@@ -87,6 +87,7 @@ function addFunctionOnClick(cell, x, y, func) {
 
 function removeOut(cell) {
     cell.onmouseout = undefined;
+    dragStart = {};
 }
 
 function addFunctionOnDragDrop(cell, x, y) {
@@ -108,7 +109,6 @@ function removeFunctions(cell) {
     cell.onclick = undefined;
     cell.onmousedown = undefined;
     cell.onmouseout = undefined;
-    dragStart = {};
 }
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
 // drawRobot(x, y)        efface un robot dans la case (x,y)
