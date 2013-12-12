@@ -524,10 +524,12 @@ function cancelLast() {
         }
         //cancelLast();
     }
-    if (proposition.length === 0)
+    if (proposition.length === 0) {
         currentRobot = {};
-    else
+        printProposition();
+    } else {
         sendProposition();
+    }
 }
 
 function displayWiners(data) {
