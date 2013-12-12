@@ -616,6 +616,7 @@ function addNextGameButton() {
 
 var gamepadSupport = {
     canStart : false,
+    canDel : false,
 // A number of typical buttons recognized by Gamepad API and mapped to
 // standard controls. Any extraneous buttons will have larger indexes.
     TYPICAL_BUTTON_COUNT: 16,
@@ -874,7 +875,7 @@ var gamepadSupport = {
             button = 2;
         if (gamepad.buttons[3])
             button = 3;
-        if (gamepad.buttons[8])
+        if (gamepad.buttons[8] && gamepadSupport.canDel)
             button = 8;
         if (gamepad.buttons[12])
             button = 12;
@@ -891,7 +892,12 @@ var gamepadSupport = {
             if(button != null)
                 gamepadSupport.canStart=true;
         }
-
+        
+        if (!gamepad.buttons[8]){
+            gamepadSupport.canDel = true;
+        }else{
+            gamepadSupport.canDel = false;
+        }
 //traitement bouton
 var dir;
         if (button != undefined) {
