@@ -1,0 +1,16 @@
+#plateau {
+    border-collapse: collapse;
+}
+
+#plateau td {
+    width:5px;
+    height:5px;
+}
+
+#plateau td div {
+    margin:1px;
+    background:black;
+    border:1px solid white;
+    width:2px;
+    height:2px;
+}
