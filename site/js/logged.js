@@ -108,6 +108,7 @@ function removeFunctions(cell) {
     cell.onclick = undefined;
     cell.onmousedown = undefined;
     cell.onmouseout = undefined;
+    dragStart = {};
 }
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
 // drawRobot(x, y)        efface un robot dans la case (x,y)
@@ -177,6 +178,8 @@ function startDrag(e) {
 
 
 function dragEnd(e) {
+        if (dragStart === {})
+            return;
         var x;
         var y;
 	if (!e) var e = window.event;
