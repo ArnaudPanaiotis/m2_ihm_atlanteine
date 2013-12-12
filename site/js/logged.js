@@ -103,6 +103,9 @@ function addFunctionOnDragDrop(cell, x, y) {
         cell.onmouseup = function(e) {
             removeOut(cell);
         };
+        cell.onmouseenter = function(e) {
+            removeOut(cell);
+        };        
 }
 
 function removeFunctions(cell) {
@@ -256,6 +259,9 @@ function getRobotPosition(color) {
 }
 
 function selectRobot(x, y) {
+    if (activateEvent === false)
+        return;
+    activateEvent = false;
     var robot = getRobot(x, y);
     if (robot === "")
         return;
@@ -397,6 +403,8 @@ function getNext(dir) {
 function onKey(event) {
 //    alert(event.keyCode);
     var key = getAction(event.keyCode);
+    if (key !== undefined)
+        event.preventDefault();
     if (key === undefined || !activateEvent && !key.command === "nextGame")
         return;
 //    alert(key.command);
@@ -421,10 +429,6 @@ function onKey(event) {
             if (nextGameButtonPresent)
                 document.getElementById("nextGame").submit();
         break;
-    }
-    if (event.preventDefault)
-    {
-        event.preventDefault();
     }
 }
 
@@ -611,6 +615,7 @@ function addNextGameButton() {
  */
 
 var gamepadSupport = {
+    canStart : false,
 // A number of typical buttons recognized by Gamepad API and mapped to
 // standard controls. Any extraneous buttons will have larger indexes.
     TYPICAL_BUTTON_COUNT: 16,
@@ -855,13 +860,12 @@ var gamepadSupport = {
     //appelé quand l'état du gamepad a changé
     updateDisplay: function(gamepadId) {
 
-
         var gamepad = gamepadSupport.gamepads[gamepadId];
 //recup bouton
 
-if (activateEvent && !gamepad.buttons[9])
-    return;
-        var button;
+        if (!activateEvent && !gamepad.buttons[9])
+            return;
+        var button;        
         if (gamepad.buttons[0])
             button = 0;
         if (gamepad.buttons[1])
@@ -872,8 +876,13 @@ if (activateEvent && !gamepad.buttons[9])
             button = 3;
         if (gamepad.buttons[8])
             button = 8;
-        if (gamepad.buttons[9])
-            button = 9;
+        if (gamepad.buttons[9] && gamepadSupport.canStart){
+            button = 9;   
+        }
+        else{
+            if(button != null)
+                gamepadSupport.canStart=true;
+        }
 
 //traitement bouton
         if (button != undefined) {
@@ -912,7 +921,7 @@ if (activateEvent && !gamepad.buttons[9])
                         if (activateEvent)
                             deleteProposition();
                     } else {
-                        gamepadSupport.stopPolling;
+                        //gamepadSupport.stopPolling;
                         document.getElementById("nextGame").submit();
                     }
                     break;
