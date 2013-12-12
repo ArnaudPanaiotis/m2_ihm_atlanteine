@@ -656,31 +656,44 @@ var gamepadSupport = {
 
     }, onButton: function(event) {
 
-        if (!activateEvent)
-            return;
         var button = event.button;
         switch (button) {
             case 0:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("green");
                 selectRobot(robot.column, robot.line);
                 break;
             case 1:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("red");
                 selectRobot(robot.column, robot.line);
                 break;
             case 2:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("blue");
                 selectRobot(robot.column, robot.line);
                 break;
             case 3:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("yellow");
                 selectRobot(robot.column, robot.line);
                 break;
             case 6:
+                if (!activateEvent)
+                    return;
                 cancelLast();
                 break;
             case 7:
-                deleteProposition();
+                if (!nextGameButtonPresent) {
+                    if (activateEvent)
+                        deleteProposition();
+                } else {
+                    document.getElementById("nextGame").submit();
+                }
                 break;
             default:
                 break;
@@ -827,12 +840,13 @@ var gamepadSupport = {
 
     //appelé quand l'état du gamepad a changé
     updateDisplay: function(gamepadId) {
-        if (!activateEvent)
-            return;
 
 
         var gamepad = gamepadSupport.gamepads[gamepadId];
 //recup bouton
+
+if (activateEvent && !gamepad.buttons[9])
+    return;
         var button;
         if (gamepad.buttons[0])
             button = 0;
@@ -848,29 +862,45 @@ var gamepadSupport = {
             button = 9;
 
 //traitement bouton
-        if (button != undefined && activateEvent) {
+        if (button != undefined) {
             switch (button) {
                 case 0:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("green");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 1:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("red");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 2:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("blue");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 3:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("yellow");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 8:
+                    if (!activateEvent)
+                        return;
                     cancelLast();
                     break;
                 case 9:
-                    deleteProposition();
+                    if (!nextGameButtonPresent) {
+                        if (activateEvent)
+                            deleteProposition();
+                    } else {
+                        gamepadSupport.stopPolling;
+                        document.getElementById("nextGame").submit();
+                    }
                     break;
                 default:
                     break;
@@ -878,6 +908,9 @@ var gamepadSupport = {
         }
 
         //recup stick
+        if (!activateEvent)
+            return;
+        
         var axis;
         var value;
         if (gamepad.axes[0] == 1 || gamepad.axes[0] == -1) {
