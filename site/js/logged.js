@@ -281,10 +281,12 @@ function selectRobot(x, y) {
 }
 
 function moveRobot(x, y) {
+    if (activateEvent === false)
+        return;
+    activateEvent = false;
     proposition.push({command: "move", line: y, column: x});
     currentRobot.nextX = x;
     currentRobot.nextY = y;
-    activateEvent = false;
     sendProposition();
 }
 
