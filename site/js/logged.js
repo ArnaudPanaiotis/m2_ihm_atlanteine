@@ -876,6 +876,14 @@ var gamepadSupport = {
             button = 3;
         if (gamepad.buttons[8])
             button = 8;
+        if (gamepad.buttons[12])
+            button = 12;
+        if (gamepad.buttons[13])
+            button = 13;
+        if (gamepad.buttons[14])
+            button = 14;
+        if (gamepad.buttons[15])
+            button = 15;
         if (gamepad.buttons[9] && gamepadSupport.canStart){
             button = 9;   
         }
@@ -885,6 +893,7 @@ var gamepadSupport = {
         }
 
 //traitement bouton
+var dir;
         if (button != undefined) {
             switch (button) {
                 case 0:
@@ -925,11 +934,37 @@ var gamepadSupport = {
                         document.getElementById("nextGame").submit();
                     }
                     break;
+                case 12:
+                    if (!activateEvent)
+                        return;
+                        dir="up";
+                    break;
+                case 13:
+                    if (!activateEvent)
+                        return;
+                        dir="down";
+                    break;
+               case 14:
+                    if (!activateEvent)
+                        return;
+                        dir="left";
+                    break;
+               case 15:
+                    if (!activateEvent)
+                        return;
+                        dir="right";
+                    break;
                 default:
                     break;
             }
+            if (dir != undefined && activateEvent){
+                var position = getNext(dir);
+                if (position === undefined)
+                    return;
+                moveRobot(position.c, position.l);
+            }
         }
-
+ 
         //recup stick
         if (!activateEvent)
             return;
@@ -952,25 +987,25 @@ var gamepadSupport = {
                 value = -1;
         }
 
-        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
-            axis = 5;
-            if (gamepad.axes[5] == 1)
-                value = 1;
-            else
-                value = -1;
-        }
-
-        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
-            axis = 6;
-            if (gamepad.axes[6] == 1)
-                value = 1;
-            else
-                value = -1;
-        }
+//        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
+//            axis = 5;
+//            if (gamepad.axes[5] == 1)
+//                value = 1;
+//            else
+//                value = -1;
+//        }
+//
+//        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
+//            axis = 6;
+//            if (gamepad.axes[6] == 1)
+//                value = 1;
+//            else
+//                value = -1;
+//        }
 
         //traitement dir
         if (axis != undefined && activateEvent) {
-            var dir;
+            
             if ((axis == 0 || axis == 5) && value == -1) {
                 dir = "left";
             }
