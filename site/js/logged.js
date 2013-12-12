@@ -524,7 +524,10 @@ function cancelLast() {
         }
         //cancelLast();
     }
-    sendProposition();
+    if (proposition.length === 0)
+        currentRobot = {};
+    else
+        sendProposition();
 }
 
 function displayWiners(data) {
