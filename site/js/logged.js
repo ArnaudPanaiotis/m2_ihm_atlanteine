@@ -87,6 +87,7 @@ function addFunctionOnClick(cell, x, y, func) {
 
 function removeOut(cell) {
     cell.onmouseout = undefined;
+    dragStart = {};
 }
 
 function addFunctionOnDragDrop(cell, x, y) {
@@ -108,7 +109,6 @@ function removeFunctions(cell) {
     cell.onclick = undefined;
     cell.onmousedown = undefined;
     cell.onmouseout = undefined;
-    dragStart = {};
 }
 // drawRobot(x, y, color) affiche un robot de couleur "color" dans la case (x,y) 
 // drawRobot(x, y)        efface un robot dans la case (x,y)
@@ -281,10 +281,12 @@ function selectRobot(x, y) {
 }
 
 function moveRobot(x, y) {
+    if (activateEvent === false)
+        return;
+    activateEvent = false;
     proposition.push({command: "move", line: y, column: x});
     currentRobot.nextX = x;
     currentRobot.nextY = y;
-    activateEvent = false;
     sendProposition();
 }
 
@@ -309,17 +311,18 @@ function updatePlateau(answer) {
     activateEvent = false;
     switch (answer.state) {
         case "INVALID_MOVE":
-            error("Déplacement impossible : " + answer.details);
+            error("Déplacement impossible");
             plateau.pop;
             activateEvent = true;
             break;
         case "INVALID_SELECT":
-            error("Sélection impossible : " + answer.details);
+            error("Sélection impossible");
             plateau.pop;
             activateEvent = true;
             break;
         case "INCOMPLETE":
         case "SUCCESS":
+            error();
             drawRobot(currentRobot.x, currentRobot.y);
             for (var i = 0; i < nextPositions.length; i++) {
                 drawNext(nextPositions[i].c, nextPositions[i].l);
@@ -329,10 +332,12 @@ function updatePlateau(answer) {
                 drawNext(nextPositions[i].c, nextPositions[i].l, currentRobot.color);
             }
             drawTarget(target.c, target.l, target.t);
-            drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
             updateRobots(currentRobot.color, currentRobot.x, currentRobot.y);
+            for (var i=0 ; i<robots.length ; i++) {
+                drawRobot(robots[i].column, robots[i].line, robots[i].color);
+            }
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length; i++) {
@@ -351,7 +356,7 @@ function updatePlateau(answer) {
             }
             break;
         default:
-            error("Erreur interne !");
+            error("Erreur interne ! " + answer.details);
     }
 }
 
@@ -456,6 +461,7 @@ function highlightCell(x, y, color) {
 }
 
 function deleteProposition() {
+    currentRobot = {};
     proposition = [];
     printProposition();
     drawGame();
@@ -463,8 +469,13 @@ function deleteProposition() {
 
 function error(text) {
     var div = document.getElementById("teuse");
-    div.innerHTML = text;
-    div.style.border = "2px solid red";
+    if (text === undefined) {
+        div.innerHTML = "";
+        div.style.border = "";        
+    } else {
+        div.innerHTML = text;
+        div.style.border = "2px solid red";
+    }
 }
 
 function success(text) {
