@@ -6,6 +6,7 @@
 		<title>Rasende Roboter</title>
 		<script type="text/javascript" src="/socket.io/socket.io.js"/>
 		<script type="text/javascript" src="js/login.js"/>
+                <link rel="stylesheet" type="text/css" href="login.css"/>
 	</head>
 	<body onload="init()">
 		<header>
@@ -21,7 +22,8 @@
 				<ul id="lesParties"/>
 			</nav>
 			<section id="detailPartie">
-				
+                            <table id="plateau"></table>
+                            <div id="plateau_idGame"></div>
 			</section>
 		</section>
 		<footer>
