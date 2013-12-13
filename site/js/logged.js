@@ -45,6 +45,9 @@ function init() {
     socket.emit('identification', {login: document.getElementById('login').value
                 , idGame: document.getElementById('idGame').value}
     );
+        
+    gamepadSupport.init();
+    ipadSupport.init();
 }
 
 function drawPlateau(dataPlateau) {
@@ -283,7 +286,12 @@ function selectRobot(x, y) {
     currentRobot.y = y;
     currentRobot.nextX = x;
     currentRobot.nextY = y;
+    
     sendProposition();
+        for (var i = 0; i < nextPositions.length; i++) {
+        drawNext(nextPositions[i].c, nextPositions[i].l);
+    }
+    nextPositions = [];
 }
 
 function moveRobot(x, y) {
@@ -605,6 +613,7 @@ function addNextGameButton() {
 
 ///////////////
 //GAMEPAD
+//////////////
 /**
  * Copyright 2012 Google Inc. All Rights Reserved.
  *
@@ -624,8 +633,9 @@ function addNextGameButton() {
  */
 
 var gamepadSupport = {
-    canStart : false,
-    canDel : false,
+    canStart : false,//bloque l'appui sur start
+    canDel : false, //bloque l'appui sur del
+    //
 // A number of typical buttons recognized by Gamepad API and mapped to
 // standard controls. Any extraneous buttons will have larger indexes.
     TYPICAL_BUTTON_COUNT: 16,
@@ -657,14 +667,10 @@ var gamepadSupport = {
                 (navigator.userAgent.indexOf('Firefox/') != -1);
 
         if (gamepadSupportAvailable) {
-            // Firefox supports the connect/disconnect event, so we attach event
-            // handlers to those.
-
-            window.addEventListener('MozGamepadConnected', gamepadSupport.onConnect, false);
-
+            
             // Since Chrome only supports polling, we initiate polling loop straight
             // away. For Firefox, we will only do it if we get a connect event.
-            if (!!navigator.webkitGamepads || !!navigator.webkitGetGamepads) {
+            if (!!navigator.webkitGamepads || !!navigator.webkitGetGamepads) { //CHROME
 
                 var rawGamepads =
                         (navigator.webkitGetGamepads && navigator.webkitGetGamepads()) ||
@@ -677,6 +683,11 @@ var gamepadSupport = {
                 }
                 gamepadSupport.startPolling();
             }
+            else{//FIREFOX 
+                // Firefox supports the connect/disconnect event, so we attach event
+                // handlers to those.
+                window.addEventListener('MozGamepadConnected', gamepadSupport.onConnect, false);    
+                }
         }
     }, onConnect: function(event) {
 
@@ -842,15 +853,10 @@ var gamepadSupport = {
             // unplug the first one, the remaining one will be at index [1]).
             gamepadSupport.gamepads = [];
 
-            // We only refresh the display when we detect some gamepads are new
-            // or removed; we do it by comparing raw gamepad table entries to
-            // “undefined.”
-            var gamepadsChanged = false;
 
             for (var i = 0; i < rawGamepads.length; i++) {
 
                 if (typeof rawGamepads[i] != gamepadSupport.prevRawGamepadTypes[i]) {
-                    gamepadsChanged = true;
                     gamepadSupport.prevRawGamepadTypes[i] = typeof rawGamepads[i];
                 }
 
@@ -859,11 +865,6 @@ var gamepadSupport = {
                 }
             }
 
-            // Ask the tester to refresh the visual representations of gamepads
-            // on the screen.
-            if (gamepadsChanged) {
-                //tester.updateGamepads(gamepadSupport.gamepads);
-            }
         }
     },
 
@@ -945,7 +946,6 @@ var dir;
                         if (activateEvent)
                             deleteProposition();
                     } else {
-                        //gamepadSupport.stopPolling;
                         document.getElementById("nextGame").submit();
                     }
                     break;
@@ -1002,22 +1002,6 @@ var dir;
                 value = -1;
         }
 
-//        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
-//            axis = 5;
-//            if (gamepad.axes[5] == 1)
-//                value = 1;
-//            else
-//                value = -1;
-//        }
-//
-//        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
-//            axis = 6;
-//            if (gamepad.axes[6] == 1)
-//                value = 1;
-//            else
-//                value = -1;
-//        }
-
         //traitement dir
         if (axis != undefined && activateEvent) {
             
@@ -1033,8 +1017,7 @@ var dir;
             if ((axis == 1 || axis == 6) && value == 1) {
                 dir = "down";
             }
-            // if (dir === undefined || !activateEvent)
-            //  return;
+
             var position = getNext(dir);
             if (position === undefined)
                 return;
