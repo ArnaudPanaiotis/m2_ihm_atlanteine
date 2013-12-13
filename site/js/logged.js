@@ -103,6 +103,9 @@ function addFunctionOnDragDrop(cell, x, y) {
         cell.onmouseup = function(e) {
             removeOut(cell);
         };
+        cell.onmouseenter = function(e) {
+            removeOut(cell);
+        };        
 }
 
 function removeFunctions(cell) {
@@ -256,6 +259,9 @@ function getRobotPosition(color) {
 }
 
 function selectRobot(x, y) {
+    if (activateEvent === false)
+        return;
+    activateEvent = false;
     var robot = getRobot(x, y);
     if (robot === "")
         return;
@@ -315,17 +321,18 @@ function updatePlateau(answer) {
     activateEvent = false;
     switch (answer.state) {
         case "INVALID_MOVE":
-            error("Déplacement impossible : " + answer.details);
+            error("Déplacement impossible");
             plateau.pop;
             activateEvent = true;
             break;
         case "INVALID_SELECT":
-            error("Sélection impossible : " + answer.details);
+            error("Sélection impossible");
             plateau.pop;
             activateEvent = true;
             break;
         case "INCOMPLETE":
         case "SUCCESS":
+            error();
             drawRobot(currentRobot.x, currentRobot.y);
             for (var i = 0; i < nextPositions.length; i++) {
                 drawNext(nextPositions[i].c, nextPositions[i].l);
@@ -335,10 +342,12 @@ function updatePlateau(answer) {
                 drawNext(nextPositions[i].c, nextPositions[i].l, currentRobot.color);
             }
             drawTarget(target.c, target.l, target.t);
-            drawRobot(currentRobot.nextX, currentRobot.nextY, currentRobot.color);
             currentRobot.x = currentRobot.nextX;
             currentRobot.y = currentRobot.nextY;
             updateRobots(currentRobot.color, currentRobot.x, currentRobot.y);
+            for (var i=0 ; i<robots.length ; i++) {
+                drawRobot(robots[i].column, robots[i].line, robots[i].color);
+            }
             if (answer.state === "SUCCESS") {
                 success("Vous avez Gagné !");
                 for (var i = 0; i < proposition.length; i++) {
@@ -357,7 +366,7 @@ function updatePlateau(answer) {
             }
             break;
         default:
-            error("Erreur interne !");
+            error("Erreur interne ! " + answer.details);
     }
 }
 
@@ -398,6 +407,8 @@ function getNext(dir) {
 function onKey(event) {
 //    alert(event.keyCode);
     var key = getAction(event.keyCode);
+    if (key !== undefined)
+        event.preventDefault();
     if (key === undefined || !activateEvent && !key.command === "nextGame")
         return;
 //    alert(key.command);
@@ -422,10 +433,6 @@ function onKey(event) {
             if (nextGameButtonPresent)
                 document.getElementById("nextGame").submit();
         break;
-    }
-    if (event.preventDefault)
-    {
-        event.preventDefault();
     }
 }
 
@@ -462,6 +469,7 @@ function highlightCell(x, y, color) {
 }
 
 function deleteProposition() {
+    currentRobot = {};
     proposition = [];
     printProposition();
     drawGame();
@@ -469,8 +477,13 @@ function deleteProposition() {
 
 function error(text) {
     var div = document.getElementById("teuse");
-    div.innerHTML = text;
-    div.style.border = "2px solid red";
+    if (text === undefined) {
+        div.innerHTML = "";
+        div.style.border = "";        
+    } else {
+        div.innerHTML = text;
+        div.style.border = "2px solid red";
+    }
 }
 
 function success(text) {
@@ -515,7 +528,12 @@ function cancelLast() {
         }
         //cancelLast();
     }
-    sendProposition();
+    if (proposition.length === 0) {
+        currentRobot = {};
+        printProposition();
+    } else {
+        sendProposition();
+    }
 }
 
 function displayWiners(data) {
@@ -606,6 +624,8 @@ function addNextGameButton() {
  */
 
 var gamepadSupport = {
+    canStart : false,
+    canDel : false,
 // A number of typical buttons recognized by Gamepad API and mapped to
 // standard controls. Any extraneous buttons will have larger indexes.
     TYPICAL_BUTTON_COUNT: 16,
@@ -665,31 +685,44 @@ var gamepadSupport = {
 
     }, onButton: function(event) {
 
-        if (!activateEvent)
-            return;
         var button = event.button;
         switch (button) {
             case 0:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("green");
                 selectRobot(robot.column, robot.line);
                 break;
             case 1:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("red");
                 selectRobot(robot.column, robot.line);
                 break;
             case 2:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("blue");
                 selectRobot(robot.column, robot.line);
                 break;
             case 3:
+                if (!activateEvent)
+                    return;
                 var robot = getRobotPosition("yellow");
                 selectRobot(robot.column, robot.line);
                 break;
             case 6:
+                if (!activateEvent)
+                    return;
                 cancelLast();
                 break;
             case 7:
-                deleteProposition();
+                if (!nextGameButtonPresent) {
+                    if (activateEvent)
+                        deleteProposition();
+                } else {
+                    document.getElementById("nextGame").submit();
+                }
                 break;
             default:
                 break;
@@ -836,13 +869,13 @@ var gamepadSupport = {
 
     //appelé quand l'état du gamepad a changé
     updateDisplay: function(gamepadId) {
-        if (!activateEvent)
-            return;
-
 
         var gamepad = gamepadSupport.gamepads[gamepadId];
 //recup bouton
-        var button;
+
+        if (!activateEvent && !gamepad.buttons[9])
+            return;
+        var button;        
         if (gamepad.buttons[0])
             button = 0;
         if (gamepad.buttons[1])
@@ -851,42 +884,106 @@ var gamepadSupport = {
             button = 2;
         if (gamepad.buttons[3])
             button = 3;
-        if (gamepad.buttons[8])
+        if (gamepad.buttons[8] && gamepadSupport.canDel)
             button = 8;
-        if (gamepad.buttons[9])
-            button = 9;
-
+        if (gamepad.buttons[12])
+            button = 12;
+        if (gamepad.buttons[13])
+            button = 13;
+        if (gamepad.buttons[14])
+            button = 14;
+        if (gamepad.buttons[15])
+            button = 15;
+        if (gamepad.buttons[9] && gamepadSupport.canStart){
+            button = 9;   
+        }
+        else{
+            if(button != null)
+                gamepadSupport.canStart=true;
+        }
+        
+        if (!gamepad.buttons[8]){
+            gamepadSupport.canDel = true;
+        }else{
+            gamepadSupport.canDel = false;
+        }
 //traitement bouton
-        if (button != undefined && activateEvent) {
+var dir;
+        if (button != undefined) {
             switch (button) {
                 case 0:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("green");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 1:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("red");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 2:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("blue");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 3:
+                    if (!activateEvent)
+                        return;
                     var robot = getRobotPosition("yellow");
                     selectRobot(robot.column, robot.line);
                     break;
                 case 8:
+                    if (!activateEvent)
+                        return;
                     cancelLast();
                     break;
                 case 9:
-                    deleteProposition();
+                    if (!nextGameButtonPresent) {
+                        if (activateEvent)
+                            deleteProposition();
+                    } else {
+                        //gamepadSupport.stopPolling;
+                        document.getElementById("nextGame").submit();
+                    }
+                    break;
+                case 12:
+                    if (!activateEvent)
+                        return;
+                        dir="up";
+                    break;
+                case 13:
+                    if (!activateEvent)
+                        return;
+                        dir="down";
+                    break;
+               case 14:
+                    if (!activateEvent)
+                        return;
+                        dir="left";
+                    break;
+               case 15:
+                    if (!activateEvent)
+                        return;
+                        dir="right";
                     break;
                 default:
                     break;
             }
+            if (dir != undefined && activateEvent){
+                var position = getNext(dir);
+                if (position === undefined)
+                    return;
+                moveRobot(position.c, position.l);
+            }
         }
-
+ 
         //recup stick
+        if (!activateEvent)
+            return;
+        
         var axis;
         var value;
         if (gamepad.axes[0] == 1 || gamepad.axes[0] == -1) {
@@ -905,25 +1002,25 @@ var gamepadSupport = {
                 value = -1;
         }
 
-        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
-            axis = 5;
-            if (gamepad.axes[5] == 1)
-                value = 1;
-            else
-                value = -1;
-        }
-
-        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
-            axis = 6;
-            if (gamepad.axes[6] == 1)
-                value = 1;
-            else
-                value = -1;
-        }
+//        if (gamepad.axes[5] == 1 || gamepad.axes[5] == -1) {
+//            axis = 5;
+//            if (gamepad.axes[5] == 1)
+//                value = 1;
+//            else
+//                value = -1;
+//        }
+//
+//        if (gamepad.axes[6] == 1 || gamepad.axes[6] == -1) {
+//            axis = 6;
+//            if (gamepad.axes[6] == 1)
+//                value = 1;
+//            else
+//                value = -1;
+//        }
 
         //traitement dir
         if (axis != undefined && activateEvent) {
-            var dir;
+            
             if ((axis == 0 || axis == 5) && value == -1) {
                 dir = "left";
             }
