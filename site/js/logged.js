@@ -288,6 +288,10 @@ function moveRobot(x, y) {
     currentRobot.nextX = x;
     currentRobot.nextY = y;
     sendProposition();
+    for (var i = 0; i < nextPositions.length; i++) {
+        drawNext(nextPositions[i].c, nextPositions[i].l);
+    }
+    nextPositions = [];
 }
 
 function sendProposition() {
